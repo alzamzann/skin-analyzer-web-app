@@ -79,7 +79,7 @@ const Icon = ({
       className={cn("absolute", iconData.className)}
     >
       <motion.div
-        className="flex h-16 w-16 items-center justify-center rounded-3xl border border-border/10 bg-card/80 p-3 shadow-xl backdrop-blur-md md:h-20 md:w-20"
+        className="flex h-16 w-16 items-center justify-center rounded-[18px] border border-[#EAEAEA] bg-white p-3 shadow-[0_14px_40px_rgba(47,52,55,0.06)] md:h-20 md:w-20"
         animate={{
           y: [0, -8, 0, 8, 0],
           x: [0, 6, 0, -6, 0],
@@ -115,7 +115,7 @@ const FloatingIconsHero = React.forwardRef<
       ref={ref}
       onMouseMove={handleMouseMove}
       className={cn(
-        "relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-background",
+        "relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#FBFBFA]",
         className,
       )}
       {...props}
@@ -132,19 +132,43 @@ const FloatingIconsHero = React.forwardRef<
         ))}
       </div>
 
-      <div className="relative z-10 px-4 text-center">
-        <h1 className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-5xl font-bold tracking-tight text-transparent md:text-7xl">
+      <motion.div
+        className="relative z-10 px-4 text-center"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+      >
+        <motion.h1
+          className="mx-auto max-w-5xl font-serif text-5xl font-medium leading-[1.04] tracking-[-0.035em] text-[#111111] text-balance md:text-7xl"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1], delay: 0.14 }}
+        >
           {title}
-        </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+        </motion.h1>
+        <motion.p
+          className="mx-auto mt-6 max-w-xl text-lg leading-7 text-[#5f5e5b]"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.64, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
+        >
           {subtitle}
-        </p>
-        <div className="mt-10">
-          <Button asChild size="lg" className="px-8 py-6 text-base font-semibold">
+        </motion.p>
+        <motion.div
+          className="mt-10"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.58, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+        >
+          <Button
+            asChild
+            size="lg"
+            className="h-12 rounded-full bg-[#111111] px-7 text-base font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#333333] active:scale-[0.98]"
+          >
             <a href={ctaHref}>{ctaText}</a>
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 });

@@ -7,17 +7,17 @@ const navItems = ["Products", "How it Works", "Science", "Privacy", "Pricing"];
 function BrandMark() {
   return (
     <motion.a
-      aria-label="DermAI home"
-      className="inline-flex items-baseline justify-self-start text-[var(--color-ink-text)]"
+      aria-label="Dermalyzer home"
+      className="inline-flex items-center justify-self-start text-[#111111]"
       href="#top"
       whileHover={{ opacity: 0.78, y: -1 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 360, damping: 24 }}
     >
-      <span className="text-[clamp(1.35rem,2vw,2rem)] font-semibold leading-none tracking-[var(--tracking-heading)]">
-        DermAI
+      <span className="text-[clamp(1.1rem,1.6vw,1.35rem)] font-semibold leading-none tracking-[-0.02em]">
+        Dermalyzer
       </span>
-      <span className="ml-1 text-[clamp(1.25rem,1.8vw,1.85rem)] font-semibold leading-none text-[var(--color-amethyst-accent)]">
+      <span className="ml-1 text-[clamp(1.05rem,1.4vw,1.25rem)] font-semibold leading-none text-[#346538]">
         *
       </span>
     </motion.a>
@@ -27,7 +27,7 @@ function BrandMark() {
 function NavLink({ item }: { item: string }) {
   return (
     <motion.a
-      className="rounded-full px-3 py-2 text-[clamp(0.82rem,0.86vw,1rem)] font-medium leading-none tracking-[0] text-[var(--color-ink-text)] transition-[color,background-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[var(--color-amethyst-accent)] hover:text-[var(--color-ink-text)] hover:shadow-[var(--shadow-subtle)] focus-visible:bg-[var(--color-sky-blue-highlight)]"
+      className="rounded-full px-3 py-2 text-[0.84rem] font-medium leading-none tracking-[0] text-[#2F3437] transition-[color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[#EDF3EC] hover:text-[#111111] focus-visible:bg-[#EDF3EC]"
       href={`#${item.toLowerCase().replaceAll(" ", "-")}`}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
@@ -41,16 +41,15 @@ function NavLink({ item }: { item: string }) {
 export function Navbar() {
   return (
     <motion.header
-      className="flex w-full justify-center px-[var(--spacing-16)] pt-[var(--spacing-20)] sm:px-[var(--spacing-24)] lg:px-[var(--spacing-40)]"
+      className="flex w-full justify-center bg-[#FBFBFA] px-4 pt-5 sm:px-6 lg:px-10"
       initial={{ opacity: 0, y: -18, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 120, damping: 18 }}
     >
       <motion.div
-        className="mx-auto grid min-h-[72px] w-full max-w-[1040px] grid-cols-1 items-center justify-items-center gap-[var(--spacing-16)] rounded-full border border-[var(--color-porcelain-surface)] bg-[var(--color-porcelain-surface)] px-[var(--spacing-20)] py-[var(--spacing-12)] shadow-[var(--shadow-md)] sm:min-h-[78px] sm:px-[var(--spacing-24)] lg:grid-cols-[minmax(140px,0.58fr)_auto_minmax(140px,0.58fr)] lg:px-[var(--spacing-32)]"
+        className="mx-auto grid min-h-[68px] w-full max-w-[1040px] grid-cols-1 items-center justify-items-center gap-4 rounded-full border border-[#EAEAEA] bg-white/95 px-5 py-3 backdrop-blur-sm sm:min-h-[74px] sm:px-6 lg:grid-cols-[minmax(140px,0.58fr)_auto_minmax(140px,0.58fr)] lg:px-8"
         whileHover={{
           y: -2,
-          boxShadow: "rgba(0, 0, 0, 0.06) 0px 14px 28px 0px",
         }}
         transition={{ type: "spring", stiffness: 180, damping: 22 }}
       >

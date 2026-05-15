@@ -288,10 +288,10 @@ export function HeroSection() {
   return (
     <FloatingIconsHero
       id="products"
-      title="A World of Innovation"
-      subtitle="Explore a universe of possibilities with our platform, connecting you to the tools and technologies that shape the future."
-      ctaText="Join the Revolution"
-      ctaHref="#how-it-works"
+      title="Dermalyzer reads visible skin signals"
+      subtitle="Upload one clear face photo to estimate a Baumann-style skin type, then review ingredient guidance and product matches from the current dataset."
+      ctaText="Start analysis"
+      ctaHref="/analyze"
       icons={demoIcons}
     />
   );

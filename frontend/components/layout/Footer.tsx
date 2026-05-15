@@ -1,7 +1,5 @@
 import type React from "react";
 
-import { Button } from "@/components/ui/Button";
-
 interface FooterProps {
   logo: React.ReactNode;
   brandName: string;
@@ -33,71 +31,71 @@ export function Footer({
   copyright,
 }: FooterProps) {
   return (
-    <footer className="pb-6 pt-16 lg:pb-8 lg:pt-24">
-      <div className="px-4 lg:px-8">
-        <div className="md:flex md:items-start md:justify-between">
+    <footer className="border-t border-[#EAEAEA] bg-[#FBFBFA] pb-8 pt-10 lg:pb-10 lg:pt-14">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-start">
           <a
             href="#top"
             className="flex items-center gap-x-2"
             aria-label={brandName}
           >
             {logo}
-            <span className="text-xl font-bold">{brandName}</span>
+            <span className="text-lg font-semibold tracking-[-0.02em] text-[#111111]">
+              {brandName}
+            </span>
           </a>
-          <ul className="mt-6 flex list-none space-x-3 md:mt-0">
-            {socialLinks.map((link, i) => (
-              <li key={i}>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
-                  asChild
-                >
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={link.label}
-                  >
-                    {link.icon}
-                  </a>
-                </Button>
-              </li>
-            ))}
-          </ul>
+          <div className="grid gap-6 md:justify-items-end">
+            <nav>
+              <ul className="-mx-2 -my-1 flex list-none flex-wrap md:justify-end">
+                {mainLinks.map((link, i) => (
+                  <li key={i} className="mx-2 my-1 shrink-0">
+                    <a
+                      href={link.href}
+                      className="text-sm font-medium text-[#2F3437] underline-offset-4 transition-colors duration-200 hover:text-[#111111] hover:underline"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            {socialLinks.length > 0 && (
+              <ul className="flex list-none space-x-3">
+                {socialLinks.map((link, i) => (
+                  <li key={i}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={link.label}
+                      className="grid h-9 w-9 place-items-center rounded-[6px] border border-[#EAEAEA] bg-white text-sm text-[#2F3437] transition-colors duration-200 hover:bg-[#F7F6F3] hover:text-[#111111]"
+                    >
+                      {link.icon}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-        <div className="mt-6 border-t pt-6 md:mt-4 md:pt-8 lg:grid lg:grid-cols-10">
-          <nav className="lg:col-[4/11] lg:mt-0">
-            <ul className="-mx-2 -my-1 flex list-none flex-wrap lg:justify-end">
-              {mainLinks.map((link, i) => (
-                <li key={i} className="mx-2 my-1 shrink-0">
-                  <a
-                    href={link.href}
-                    className="text-sm text-primary underline-offset-4 hover:underline"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div className="mt-6 lg:col-[4/11] lg:mt-0">
-            <ul className="-mx-3 -my-1 flex list-none flex-wrap lg:justify-end">
+        <div className="mt-10 grid gap-5 border-t border-[#EAEAEA] pt-6 text-sm leading-6 text-[#787774] md:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <div>{copyright.text}</div>
+            {copyright.license && <div>{copyright.license}</div>}
+          </div>
+          <div>
+            <ul className="-mx-3 -my-1 flex list-none flex-wrap md:justify-end">
               {legalLinks.map((link, i) => (
                 <li key={i} className="mx-3 my-1 shrink-0">
                   <a
                     href={link.href}
-                    className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+                    className="text-sm text-[#787774] underline-offset-4 transition-colors duration-200 hover:text-[#111111] hover:underline"
                   >
                     {link.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="mt-6 whitespace-nowrap text-sm leading-6 text-muted-foreground lg:col-[1/4] lg:row-[1/3] lg:mt-0">
-            <div>{copyright.text}</div>
-            {copyright.license && <div>{copyright.license}</div>}
           </div>
         </div>
       </div>

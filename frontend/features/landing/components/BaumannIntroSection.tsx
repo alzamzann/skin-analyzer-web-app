@@ -1,44 +1,106 @@
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
+import { MotionReveal } from "@/features/landing/components/MotionReveal";
 
-const highlights = [
-  "Oiliness",
-  "Sensitivity",
-  "Pigmentation",
-  "Wrinkle tendency",
+const axes = [
+  {
+    label: "Dry vs oily",
+    code: "D / O",
+    description: "Uses the Dry label to decide whether the profile starts dry or oily.",
+  },
+  {
+    label: "Sensitive vs resistant",
+    code: "S / R",
+    description: "Uses Acne or Redness to route the skin type toward sensitivity.",
+  },
+  {
+    label: "Pigmented vs non-pigmented",
+    code: "P / N",
+    description: "Uses Hyperpigmentation to explain uneven-tone recommendation needs.",
+  },
+  {
+    label: "Wrinkled vs tight",
+    code: "W / T",
+    description: "Uses Wrinkles to separate texture-focused care from firm-skin care.",
+  },
 ];
 
 export function BaumannIntroSection() {
   return (
-    <section id="science" className="w-full bg-background py-16 sm:py-24">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-        <div>
-          <Badge>Baumann method</Badge>
-          <h2 className="mt-5 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Skin guidance that starts with a structured type.
+    <section id="science" className="w-full bg-[#FBFBFA] px-4 py-24 sm:py-32">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+        <MotionReveal className="lg:pt-10">
+          <Badge className="border-[#EAEAEA] bg-[#EDF3EC] text-[#346538]">
+            Baumann method
+          </Badge>
+          <h2 className="mt-6 max-w-2xl font-serif text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-6xl">
+            Baumann typing makes the model output easier to use.
           </h2>
-          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-            DermAI organizes visible skin signals into a Baumann-style profile,
-            then turns that result into ingredient and product guidance.
+          <p className="mt-6 max-w-[62ch] text-base leading-7 text-[#5f5e5b]">
+            The model predicts visible labels like Dry, Acne, Redness,
+            Hyperpigmentation, and Wrinkles. Dermalyzer maps those signals into a
+            four-letter Baumann type, then uses that code to find ingredients
+            and products from the current dataset.
           </p>
-        </div>
-        <Card className="border-[var(--color-platinum-border)] bg-[var(--color-porcelain-surface)]">
-          <CardHeader>
-            <CardTitle>What the analyzer checks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {highlights.map((item) => (
+          <div className="mt-10 grid max-w-lg grid-cols-2 border-y border-[#EAEAEA] py-5 text-sm">
+            <div>
+              <div className="font-mono text-3xl font-semibold text-[#111111]">
+                16
+              </div>
+              <p className="mt-1 text-[#787774]">possible profiles</p>
+            </div>
+            <div className="border-l border-[#EAEAEA] pl-5">
+              <div className="font-mono text-3xl font-semibold text-[#111111]">
+                4
+              </div>
+              <p className="mt-1 text-[#787774]">decision axes</p>
+            </div>
+          </div>
+        </MotionReveal>
+        <MotionReveal delay={0.08}>
+        <Card className="relative overflow-hidden rounded-[12px] border border-[#EAEAEA] bg-white">
+          <CardContent className="p-0">
+            <div className="grid border-b border-[#EAEAEA] lg:grid-cols-[1fr_auto]">
+              <div className="p-6 sm:p-8">
+                <p className="text-sm font-medium text-[#787774]">
+                  Sample output
+                </p>
+                <div className="mt-4 font-mono text-7xl font-semibold leading-none tracking-[-0.04em] text-[#111111] sm:text-8xl">
+                  DSPT
+                </div>
+              </div>
+              <div className="flex items-end border-t border-[#EAEAEA] bg-[#F7F6F3] p-6 sm:p-8 lg:border-l lg:border-t-0">
+                <p className="max-w-56 text-sm leading-6 text-[#5f5e5b]">
+                  The letters are a routing system for product filters,
+                  ingredient priorities, and recommendation explanations.
+                </p>
+              </div>
+            </div>
+            <div className="divide-y divide-[#EAEAEA]">
+              {axes.map((axis) => (
                 <div
-                  className="rounded-2xl border border-[var(--color-platinum-border)] bg-[var(--color-cloud-canvas)] p-5 text-sm font-medium text-[var(--color-ink-text)]"
-                  key={item}
+                  className="grid gap-4 p-6 sm:grid-cols-[6rem_1fr] sm:p-8"
+                  key={axis.label}
                 >
-                  {item}
+                  <div className="flex min-h-12 items-center">
+                    <span className="inline-flex rounded-[8px] border border-[#EAEAEA] bg-[#FBF3DB] px-3 py-2 font-mono text-base font-semibold tracking-[-0.02em] text-[#956400]">
+                    {axis.code}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#111111]">
+                      {axis.label}
+                    </h3>
+                    <p className="mt-1 max-w-[55ch] text-sm leading-6 text-[#5f5e5b]">
+                      {axis.description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+        </MotionReveal>
       </div>
     </section>
   );

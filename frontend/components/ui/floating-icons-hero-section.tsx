@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils/cn";
 
 interface IconProps {
   id: number;

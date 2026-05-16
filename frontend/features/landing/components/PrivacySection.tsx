@@ -37,7 +37,7 @@ export function PrivacySection() {
             <Badge className="border-[#EAEAEA] bg-[#E1F3FE] text-[#1F6C9F]">
               Privacy
             </Badge>
-            <h2 className="mt-5 max-w-xl font-serif text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-5xl">
+            <h2 className="mt-5 max-w-xl text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-5xl">
               Clear boundaries before upload.
             </h2>
             <p className="mt-5 max-w-[58ch] text-base leading-7 text-[#5f5e5b]">

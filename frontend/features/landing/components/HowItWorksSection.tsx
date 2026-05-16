@@ -123,7 +123,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#787774]">
             Process
           </p>
-          <h2 className="mt-4 font-serif text-4xl font-medium leading-[1.08] tracking-[-0.03em] text-[#111111] sm:text-6xl">
+          <h2 className="mt-4 text-4xl font-medium leading-[1.08] tracking-[-0.03em] text-[#111111] sm:text-6xl">
             How it works
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#5f5e5b]">

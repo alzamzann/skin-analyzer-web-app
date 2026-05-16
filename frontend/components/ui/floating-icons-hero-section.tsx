@@ -139,7 +139,7 @@ const FloatingIconsHero = React.forwardRef<
         transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
       >
         <motion.h1
-          className="mx-auto max-w-5xl font-serif text-5xl font-medium leading-[1.04] tracking-[-0.035em] text-[#111111] text-balance md:text-7xl"
+          className="mx-auto max-w-5xl text-5xl font-medium leading-[1.04] tracking-[-0.035em] text-[#111111] text-balance md:text-7xl"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1], delay: 0.14 }}

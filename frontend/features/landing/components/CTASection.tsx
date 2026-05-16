@@ -15,7 +15,7 @@ export function CTASection() {
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#787774]">
                 Skin analysis
               </p>
-              <h2 className="mt-3 max-w-2xl font-serif text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-6xl">
+              <h2 className="mt-3 max-w-2xl text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-6xl">
                 Start with one clear photo.
               </h2>
               <p className="mt-4 max-w-[62ch] text-base leading-7 text-[#5f5e5b]">

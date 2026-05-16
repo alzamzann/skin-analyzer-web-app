@@ -4,24 +4,17 @@ import { Camera, CheckCircle2, LockKeyhole, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { cn } from "@/lib/utils/cn";
 
 interface ImageUploadCardProps {
-  canAnalyze?: boolean;
   error?: string | null;
   fileName?: string | null;
-  isAnalyzing?: boolean;
-  onAnalyze?: () => void;
   onFileSelect: (file: File | null) => void;
   onOpenCamera?: () => void;
 }
 
 export function ImageUploadCard({
-  canAnalyze = false,
   error,
   fileName,
-  isAnalyzing = false,
-  onAnalyze,
   onFileSelect,
   onOpenCamera,
 }: ImageUploadCardProps) {
@@ -82,21 +75,6 @@ export function ImageUploadCard({
         )}
 
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-
-        {onAnalyze && (
-          <Button
-            type="button"
-            size="lg"
-            disabled={!canAnalyze || isAnalyzing}
-            onClick={onAnalyze}
-            className={cn(
-              "mt-6 w-full max-w-[320px]",
-              isAnalyzing && "opacity-80",
-            )}
-          >
-            {isAnalyzing ? "Analyzing..." : "Analyze image"}
-          </Button>
-        )}
 
         <p className="mt-7 flex items-center justify-center gap-2 text-xs text-[var(--color-slate-grille)]">
           <LockKeyhole className="h-3.5 w-3.5" />

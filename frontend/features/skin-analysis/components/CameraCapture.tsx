@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Camera, CameraOff, Check, RotateCcw, X } from "lucide-react";
+import {
+  Camera,
+  CameraOff,
+  Check,
+  RotateCcw,
+  ScanFace,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 
@@ -106,36 +113,68 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
               className="object-cover"
             />
           ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-            />
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="h-full w-full object-cover"
+              />
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_36%,rgba(0,38,43,0.18)_72%)]" />
+                <div className="relative grid h-[64%] max-h-[360px] min-h-[240px] w-[54%] min-w-[220px] max-w-[320px] place-items-center rounded-[46%] border border-white/80 shadow-[0_0_0_999px_rgba(0,38,43,0.08)]">
+                  <span className="absolute left-0 top-0 h-9 w-9 -translate-x-3 -translate-y-3 border-l-2 border-t-2 border-[var(--color-spring-leaf)]" />
+                  <span className="absolute right-0 top-0 h-9 w-9 -translate-y-3 translate-x-3 border-r-2 border-t-2 border-[var(--color-spring-leaf)]" />
+                  <span className="absolute bottom-0 left-0 h-9 w-9 -translate-x-3 translate-y-3 border-b-2 border-l-2 border-[var(--color-spring-leaf)]" />
+                  <span className="absolute bottom-0 right-0 h-9 w-9 translate-x-3 translate-y-3 border-b-2 border-r-2 border-[var(--color-spring-leaf)]" />
+                  <div className="grid place-items-center gap-3 text-center text-white drop-shadow-[0_1px_8px_rgba(0,38,43,0.55)]">
+                    <ScanFace className="h-14 w-14" strokeWidth={1.35} />
+                    <span className="rounded-full bg-[rgba(0,38,43,0.42)] px-4 py-2 text-xs font-semibold tracking-[0.02em] backdrop-blur-sm">
+                      Center your face here
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
-        <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="mt-6 flex flex-col gap-3 border-t border-[var(--color-ash-cloud)]/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            type="button"
+            variant="secondary"
+            className="gap-2"
+            onClick={onClose}
+          >
             <CameraOff className="h-4 w-4" />
             Cancel
           </Button>
           {capturedUrl ? (
-            <>
-              <Button type="button" variant="outline" onClick={handleRetake}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={handleRetake}
+              >
                 <RotateCcw className="h-4 w-4" />
                 Retake
               </Button>
-              <Button type="button" onClick={handleConfirm}>
+              <Button type="button" className="gap-2" onClick={handleConfirm}>
                 <Check className="h-4 w-4" />
                 Confirm photo
               </Button>
-            </>
+            </div>
           ) : (
-            <Button type="button" disabled={!stream} onClick={handleCapture}>
+            <Button
+              type="button"
+              className="gap-2"
+              disabled={!stream}
+              onClick={handleCapture}
+            >
               <Camera className="h-4 w-4" />
               Capture photo
             </Button>

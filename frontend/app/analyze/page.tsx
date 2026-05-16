@@ -7,11 +7,9 @@ import {
   BadgeCheck,
   Focus,
   LockKeyhole,
-  ScanFace,
   Smile,
   Sparkles,
   SunMedium,
-  Target,
 } from "lucide-react";
 
 import { Navbar } from "@/components/layout/Navbar";
@@ -24,24 +22,6 @@ import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
 import { useAnalyzeSkin } from "@/features/skin-analysis/hooks/useAnalyzeSkin";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
-
-const capabilities = [
-  {
-    icon: Sparkles,
-    title: "AI-powered analysis",
-    description: "Advanced multi-label model",
-  },
-  {
-    icon: ScanFace,
-    title: "Baumann skin type",
-    description: "Mapped into 1 of 16 skin types",
-  },
-  {
-    icon: Target,
-    title: "Personalized insights",
-    description: "Ingredients and products tailored to you",
-  },
-];
 
 const guidance = [
   { icon: Focus, label: "Face front and centered" },
@@ -128,43 +108,12 @@ export default function AnalyzePage() {
         </section>
 
         <section
-          aria-label="Analysis capabilities"
-          className="mx-auto grid w-full max-w-4xl gap-0 overflow-hidden rounded-[20px] border border-[var(--color-ash-cloud)] bg-white/95 shadow-[0_18px_60px_rgba(0,38,43,0.06)] md:grid-cols-3"
-        >
-          {capabilities.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={item.title}
-                className="flex items-center gap-4 border-b border-[var(--color-ash-cloud)]/60 p-5 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0"
-              >
-                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[var(--color-pale-mint)] text-[var(--color-oceanic-deep)]">
-                  <Icon className="h-6 w-6" strokeWidth={1.7} />
-                </span>
-                <div>
-                  <h2 className="text-sm font-semibold text-[var(--color-midnight-ink)]">
-                    {item.title}
-                  </h2>
-                  <p className="mt-1 text-sm leading-5 text-[var(--color-slate-grille)]">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </section>
-
-        <section
           id="upload"
-          className="mx-auto grid w-full max-w-4xl gap-6 py-6 lg:grid-cols-[1.08fr_0.92fr]"
+          className="mx-auto grid w-full max-w-4xl gap-6 pb-6 lg:grid-cols-[1.08fr_0.92fr]"
         >
           <ImageUploadCard
-            canAnalyze={Boolean(file) && !isAnalyzing}
             error={uploadError}
             fileName={file?.name}
-            isAnalyzing={isAnalyzing}
-            onAnalyze={() => file && analyze(file)}
             onFileSelect={stageFileForPreview}
             onOpenCamera={() => setShowCamera(true)}
           />
@@ -179,6 +128,15 @@ export default function AnalyzePage() {
               </h2>
             </div>
             <ImagePreview imageUrl={previewUrl} />
+            <Button
+              type="button"
+              size="lg"
+              disabled={!file || isAnalyzing}
+              onClick={() => file && analyze(file)}
+              className="h-12 w-full gap-2"
+            >
+              {isAnalyzing ? "Analyzing..." : "Analyze image"}
+            </Button>
             {isAnalyzing && <AnalysisLoading />}
             {analysisError && <AnalysisError message={analysisError} />}
             {status === "success" && result && (

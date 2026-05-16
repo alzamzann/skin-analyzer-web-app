@@ -15,6 +15,7 @@ export interface ProductRecommendation {
   name: string;
   brand: string;
   category: ProductCategory;
+  description?: string;
   price: number;
   imageUrl?: string;
 }

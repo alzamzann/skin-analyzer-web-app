@@ -1,5 +1,6 @@
+import Image from "next/image";
+
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardContent } from "@/components/ui/Card";
 import { formatPrice } from "@/lib/utils/formatPrice";
 
 import type { ProductRecommendation } from "../types/result.types";
@@ -10,15 +11,35 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Card>
-      <CardContent className="p-5">
-        <Badge>{product.category}</Badge>
-        <h3 className="mt-4 font-semibold text-foreground">{product.name}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{product.brand}</p>
-        <p className="mt-4 text-sm font-semibold text-foreground">
+    <article className="grid gap-5 rounded-[16px] border border-[#EAEAEA] bg-white p-3 transition-[background-color,box-shadow] duration-200 hover:bg-[#F9FDFD] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:grid-cols-[150px_1fr] sm:items-center sm:p-4">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-[#F4F6F7]">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="grid h-full place-items-center text-sm text-[#A1C2C6]">
+            Dermalyzer
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 px-1">
+        <Badge className="border-[#0B7A75]/20 bg-[#DDF1EF] px-3.5 py-1.5 text-[0.68rem] uppercase tracking-[0.08em] text-[#006A66]">
+          {product.category}
+        </Badge>
+        <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-[#0B1026]">
+          {product.name}
+        </h3>
+        <p className="mt-1 text-sm text-[#4F6466]">
+          {product.description ?? product.brand}
+        </p>
+        <p className="mt-3 text-sm font-semibold text-[#0B7A75]">
           {formatPrice(product.price)}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }

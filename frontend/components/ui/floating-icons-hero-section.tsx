@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils/cn";
 
 interface IconProps {
   id: number;
-  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<{ className?: string }>;
   className: string;
 }
 
@@ -92,7 +92,7 @@ const Icon = ({
           ease: "easeInOut",
         }}
       >
-        <iconData.icon className="h-8 w-8 text-foreground md:h-10 md:w-10" />
+        <iconData.icon className="h-10 w-10 text-4xl text-foreground md:h-12 md:w-12 md:text-5xl" />
       </motion.div>
     </motion.div>
   );

@@ -24,14 +24,14 @@ function createAlphabetIcon(letter: string, color: string) {
   return AlphabetIcon;
 }
 
-const TypeD = createAlphabetIcon("D", "#E87474");
-const TypeO = createAlphabetIcon("O", "#E9A85F");
-const TypeS = createAlphabetIcon("S", "#CDBB3F");
-const TypeR = createAlphabetIcon("R", "#78B86B");
-const TypeP = createAlphabetIcon("P", "#44B9A8");
-const TypeN = createAlphabetIcon("N", "#5CA8D6");
-const TypeW = createAlphabetIcon("W", "#7F7BDB");
-const TypeT = createAlphabetIcon("T", "#C970C9");
+const TypeD = createAlphabetIcon("D", "#C77D8A");
+const TypeO = createAlphabetIcon("O", "#C28B55");
+const TypeS = createAlphabetIcon("S", "#7FA56F");
+const TypeR = createAlphabetIcon("R", "#5FA89B");
+const TypeP = createAlphabetIcon("P", "#6E9DBC");
+const TypeN = createAlphabetIcon("N", "#8585BC");
+const TypeW = createAlphabetIcon("W", "#A77CAA");
+const TypeT = createAlphabetIcon("T", "#9B8E68");
 
 const alphabetIcons: FloatingIconsHeroProps["icons"] = [
   { id: 1, icon: TypeD, className: "top-[13%] left-[12%]" },

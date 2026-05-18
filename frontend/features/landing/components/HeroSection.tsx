@@ -1,47 +1,62 @@
 "use client";
 
 import {
+  Droplet,
+  Layers,
+  Leaf,
+  ScanFace,
+  Shield,
+  Sparkles,
+  SunMedium,
+  Waves,
+  type LucideIcon,
+} from "lucide-react";
+
+import {
   FloatingIconsHero,
   type FloatingIconsHeroProps,
 } from "@/components/ui/floating-icons-hero-section";
 
-interface AlphabetIconProps {
+interface ClinicalIconProps {
   className?: string;
 }
 
-function createAlphabetIcon(letter: string, color: string) {
-  const AlphabetIcon = ({ className }: AlphabetIconProps) => (
-    <span
+function createClinicalIcon(
+  Icon: LucideIcon,
+  color: string,
+  displayName: string,
+) {
+  const ClinicalIcon = ({ className }: ClinicalIconProps) => (
+    <Icon
       aria-hidden="true"
-      className={`${className ?? ""} grid place-items-center font-bold leading-none tracking-[-0.05em]`}
+      className={className}
+      strokeWidth={1.65}
       style={{ color }}
-    >
-      {letter}
-    </span>
+    />
   );
 
-  AlphabetIcon.displayName = `Type${letter}`;
-  return AlphabetIcon;
+  ClinicalIcon.displayName = displayName;
+  return ClinicalIcon;
 }
 
-const TypeD = createAlphabetIcon("D", "#C77D8A");
-const TypeO = createAlphabetIcon("O", "#C28B55");
-const TypeS = createAlphabetIcon("S", "#7FA56F");
-const TypeR = createAlphabetIcon("R", "#5FA89B");
-const TypeP = createAlphabetIcon("P", "#6E9DBC");
-const TypeN = createAlphabetIcon("N", "#8585BC");
-const TypeW = createAlphabetIcon("W", "#A77CAA");
-const TypeT = createAlphabetIcon("T", "#9B8E68");
+const OilSignal = createClinicalIcon(Droplet, "#5FA89B", "OilSignal");
+const BarrierSignal = createClinicalIcon(Shield, "#7FA56F", "BarrierSignal");
+const ScanSignal = createClinicalIcon(ScanFace, "#6E9DBC", "ScanSignal");
+const ToneSignal = createClinicalIcon(Sparkles, "#C77D8A", "ToneSignal");
+const TextureSignal = createClinicalIcon(Waves, "#8585BC", "TextureSignal");
+const SunSignal = createClinicalIcon(SunMedium, "#C28B55", "SunSignal");
+const BotanicalSignal = createClinicalIcon(Leaf, "#9B8E68", "BotanicalSignal");
+const LayerSignal = createClinicalIcon(Layers, "#A77CAA", "LayerSignal");
 
-const alphabetIcons: FloatingIconsHeroProps["icons"] = [
-  { id: 1, icon: TypeD, className: "top-[13%] left-[12%]" },
-  { id: 2, icon: TypeO, className: "top-[18%] right-[12%]" },
-  { id: 3, icon: TypeS, className: "top-[39%] left-[10%]" },
-  { id: 4, icon: TypeR, className: "top-[43%] right-[9%]" },
-  { id: 5, icon: TypeP, className: "bottom-[15%] left-[15%]" },
-  { id: 6, icon: TypeN, className: "bottom-[13%] right-[15%]" },
-  { id: 7, icon: TypeW, className: "top-[8%] left-[47%]" },
-  { id: 8, icon: TypeT, className: "bottom-[8%] right-[45%]" },
+const clinicalSignalIcons: FloatingIconsHeroProps["icons"] = [
+  { id: 1, icon: OilSignal, className: "top-[13%] left-[12%]" },
+  { id: 2, icon: BarrierSignal, className: "top-[18%] right-[12%]" },
+  { id: 3, icon: ScanSignal, className: "top-[39%] left-[10%]" },
+  { id: 4, icon: ToneSignal, className: "top-[43%] right-[9%]" },
+  { id: 5, icon: TextureSignal, className: "bottom-[15%] left-[15%]" },
+  { id: 6, icon: SunSignal, className: "bottom-[13%] right-[15%]" },
+  { id: 7, icon: BotanicalSignal, className: "top-[8%] left-[47%]" },
+  { id: 8, icon: LayerSignal, className: "bottom-[8%] right-[45%]" },
 ];
 
 export function HeroSection() {
@@ -52,7 +67,7 @@ export function HeroSection() {
       subtitle="Upload one clear face photo to estimate a Baumann-style skin type, then review ingredient guidance and product matches from the current dataset."
       ctaText="Start analysis"
       ctaHref="/analyze"
-      icons={alphabetIcons}
+      icons={clinicalSignalIcons}
     />
   );
 }

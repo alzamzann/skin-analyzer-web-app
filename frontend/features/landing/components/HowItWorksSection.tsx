@@ -10,7 +10,6 @@ type HowItWorksProps = React.HTMLAttributes<HTMLElement>;
 
 interface StepCardProps {
   icon: React.ReactNode;
-  step: string;
   title: string;
   description: string;
   benefits: string[];
@@ -18,7 +17,6 @@ interface StepCardProps {
 
 const StepCard: React.FC<StepCardProps> = ({
   icon,
-  step,
   title,
   description,
   benefits,
@@ -38,9 +36,6 @@ const StepCard: React.FC<StepCardProps> = ({
     <div className="mb-5 flex items-center justify-between gap-4">
       <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#EAEAEA] bg-[#EDF3EC] text-[#346538]">
         {icon}
-      </div>
-      <div className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-[#787774]">
-        {step}
       </div>
     </div>
     <h3 className="mb-2 text-xl font-semibold tracking-[-0.01em] text-[#111111]">
@@ -70,7 +65,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
   const stepsData = [
     {
       icon: <Camera className="h-5 w-5" strokeWidth={1.75} />,
-      step: "01",
+      step: "1",
       title: "Upload one face photo",
       description:
         "Choose a clear front-facing image or use the camera capture flow.",
@@ -82,7 +77,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
     },
     {
       icon: <ScanFace className="h-5 w-5" strokeWidth={1.75} />,
-      step: "02",
+      step: "2",
       title: "Map visible attributes",
       description:
         "The backend detects face regions and maps model labels into a Baumann type.",
@@ -94,7 +89,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
     },
     {
       icon: <Sparkles className="h-5 w-5" strokeWidth={1.75} />,
-      step: "03",
+      step: "3",
       title: "Review recommendations",
       description:
         "See ingredients and product matches ranked from the current dataset.",
@@ -155,7 +150,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
             {stepsData.map((step) => (
               <motion.div
                 key={step.step}
-                className="flex h-9 w-9 items-center justify-center justify-self-center rounded-full border border-[#EAEAEA] bg-[#EDF3EC] font-mono text-xs font-semibold text-[#346538] ring-8 ring-[#F7FBFB]"
+                className="flex h-9 w-9 items-center justify-center justify-self-center rounded-full border border-[#D7E5E3] bg-[#EDF3EC] font-mono text-sm font-semibold text-[#346538] ring-8 ring-[#FBFBFA]"
                 variants={{
                   hidden: { opacity: 0, y: 10, scale: 0.92 },
                   visible: { opacity: 1, y: 0, scale: 1 },
@@ -182,7 +177,6 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
             <StepCard
               key={index}
               icon={step.icon}
-              step={step.step}
               title={step.title}
               description={step.description}
               benefits={step.benefits}

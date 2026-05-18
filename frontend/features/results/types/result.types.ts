@@ -1,5 +1,3 @@
-import type { ProductCategory } from "@/lib/constants/productCategories";
-
 export interface SkinAttribute {
   label: string;
   value: number;
@@ -8,14 +6,26 @@ export interface SkinAttribute {
 export interface Ingredient {
   name: string;
   reason: string;
+  ingredientType?: string | null;
+  alternateName?: string | null;
+  inciName?: string | null;
+  bestFor?: string | null;
+  canUsedTo?: string | null;
+  notRecommend?: string | null;
+  personalCareCategory?: string | null;
+  topicalUse?: string | null;
 }
 
 export interface ProductRecommendation {
   id: string;
+  bpomId?: string | null;
   name: string;
   brand: string;
-  category: ProductCategory;
+  category: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
+  productUrl?: string | null;
+  matchedIngredients?: string[];
+  similarityScore?: number;
 }

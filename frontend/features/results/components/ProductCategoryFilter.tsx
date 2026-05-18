@@ -1,19 +1,15 @@
 "use client";
 
-import {
-  productCategories,
-  type ProductCategory,
-} from "@/lib/constants/productCategories";
 import { cn } from "@/lib/utils/cn";
 
 interface ProductCategoryFilterProps {
-  value: ProductCategory | "All";
-  onChange: (value: ProductCategory | "All") => void;
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
 }
 
-const filterOptions = ["All", ...productCategories] as const;
-
 export function ProductCategoryFilter({
+  options,
   value,
   onChange,
 }: ProductCategoryFilterProps) {
@@ -23,7 +19,7 @@ export function ProductCategoryFilter({
       className="flex flex-wrap gap-3"
       role="group"
     >
-      {filterOptions.map((option) => {
+      {options.map((option) => {
         const isActive = value === option;
 
         return (
@@ -38,7 +34,7 @@ export function ProductCategoryFilter({
             )}
             onClick={() => onChange(option)}
           >
-            {option === "All" ? "All" : option}
+            {option}
           </button>
         );
       })}

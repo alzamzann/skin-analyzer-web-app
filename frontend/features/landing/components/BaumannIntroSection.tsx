@@ -6,7 +6,8 @@ const axes = [
   {
     label: "Dry vs oily",
     code: "D / O",
-    description: "Uses the Dry label to decide whether the profile starts dry or oily.",
+    description:
+      "Uses Blackheads or Enlarged Pores to decide whether the profile starts oily or dry.",
   },
   {
     label: "Sensitive vs resistant",
@@ -16,7 +17,7 @@ const axes = [
   {
     label: "Pigmented vs non-pigmented",
     code: "P / N",
-    description: "Uses Hyperpigmentation to explain uneven-tone recommendation needs.",
+    description: "Uses Pigmentation to explain uneven-tone recommendation needs.",
   },
   {
     label: "Wrinkled vs tight",
@@ -27,7 +28,7 @@ const axes = [
 
 export function BaumannIntroSection() {
   return (
-    <section id="science" className="w-full bg-[#FBFBFA] px-4 py-24 sm:py-32">
+    <section id="science" className="w-full bg-transparent px-4 py-24 sm:py-32">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <MotionReveal className="lg:pt-10">
           <Badge className="border-[#EAEAEA] bg-[#EDF3EC] text-[#346538]">
@@ -37,10 +38,10 @@ export function BaumannIntroSection() {
             Baumann typing makes the model output easier to use.
           </h2>
           <p className="mt-6 max-w-[62ch] text-base leading-7 text-[#5f5e5b]">
-            The model predicts visible labels like Dry, Acne, Redness,
-            Hyperpigmentation, and Wrinkles. Dermalyzer maps those signals into a
-            four-letter Baumann type, then uses that code to find ingredients
-            and products from the current dataset.
+            The model predicts visible labels like Acne, Redness, Pigmentation,
+            Blackheads, Wrinkles, and Enlarged Pores. Dermalyzer maps those
+            signals into a four-letter Baumann type, then uses that code to find
+            ingredients and products from the current dataset.
           </p>
           <div className="mt-10 grid max-w-lg grid-cols-2 border-y border-[#EAEAEA] py-5 text-sm">
             <div>

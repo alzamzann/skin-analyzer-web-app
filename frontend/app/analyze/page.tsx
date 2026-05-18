@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -22,6 +23,7 @@ import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
 import { useAnalyzeSkin } from "@/features/skin-analysis/hooks/useAnalyzeSkin";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
+import { saveAnalysisResult } from "@/features/results/utils/analysisResultStorage";
 
 const guidance = [
   { icon: Focus, label: "Face front and centered" },
@@ -31,6 +33,7 @@ const guidance = [
 ];
 
 export default function AnalyzePage() {
+  const router = useRouter();
   const [showCamera, setShowCamera] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
@@ -69,6 +72,18 @@ export default function AnalyzePage() {
 
     selectFile(pendingFile);
     closePendingPreview();
+  };
+
+  const handleAnalyze = async () => {
+    if (!file) {
+      return;
+    }
+
+    const nextResult = await analyze(file);
+    if (nextResult) {
+      saveAnalysisResult(nextResult);
+      router.push("/result");
+    }
   };
 
   return (
@@ -132,7 +147,7 @@ export default function AnalyzePage() {
               type="button"
               size="lg"
               disabled={!file || isAnalyzing}
-              onClick={() => file && analyze(file)}
+              onClick={handleAnalyze}
               className="h-12 w-full gap-2"
             >
               {isAnalyzing ? "Analyzing..." : "Analyze image"}

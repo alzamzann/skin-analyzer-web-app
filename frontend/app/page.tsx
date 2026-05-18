@@ -12,9 +12,9 @@ export default function Home() {
   return (
     <main
       id="top"
-      className="min-h-[100dvh] bg-[#FBFBFA] text-[#2F3437]"
+      className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#F7FBFB_0%,#EBEBEB_48%,#FFFFFF_100%)] text-[#2F3437]"
     >
-      <Navbar />
+      <Navbar className="bg-transparent" />
       <HeroSection />
       <HowItWorksSection />
       <BaumannIntroSection />

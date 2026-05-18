@@ -39,6 +39,26 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="mt-3 text-sm font-semibold text-[#0B7A75]">
           {formatPrice(product.price)}
         </p>
+        {typeof product.similarityScore === "number" && (
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#4F6466]">
+            Match {Math.round(product.similarityScore * 100)}%
+          </p>
+        )}
+        {product.matchedIngredients && product.matchedIngredients.length > 0 && (
+          <p className="mt-2 text-xs leading-5 text-[#4F6466]">
+            Matched: {product.matchedIngredients.join(", ")}
+          </p>
+        )}
+        {product.productUrl && (
+          <a
+            className="mt-3 inline-flex text-sm font-semibold text-[#0B7A75] hover:text-[#0B1026]"
+            href={product.productUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            View product
+          </a>
+        )}
       </div>
     </article>
   );

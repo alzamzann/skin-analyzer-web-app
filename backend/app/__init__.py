@@ -1,0 +1,1 @@
+"""Dermalyzer backend application package."""

@@ -2,12 +2,10 @@
 
 import { useMemo, useState } from "react";
 
-import type { ProductCategory } from "@/lib/constants/productCategories";
-
 import type { ProductRecommendation } from "../types/result.types";
 
 export function useProductFilter(products: ProductRecommendation[]) {
-  const [category, setCategory] = useState<ProductCategory | "All">("All");
+  const [category, setCategory] = useState<string>("All");
 
   const filteredProducts = useMemo(() => {
     if (category === "All") {

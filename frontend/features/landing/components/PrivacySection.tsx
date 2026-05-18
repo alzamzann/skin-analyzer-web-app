@@ -30,7 +30,7 @@ export function PrivacySection() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <section id="privacy" className="w-full bg-[#FBFBFA] px-4 py-24 sm:py-32">
+    <section id="privacy" className="w-full bg-transparent px-4 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-8 border-y border-[#EAEAEA] py-10 md:grid-cols-[0.82fr_1.18fr] md:items-start lg:py-12">
           <MotionReveal>

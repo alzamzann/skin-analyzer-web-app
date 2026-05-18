@@ -89,7 +89,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
       benefits: [
         "Forehead, nose, and cheek ROIs",
         "EfficientNet confidence scores",
-        "Dry, acne, redness, pigmentation, wrinkles",
+        "Acne, redness, pigmentation, blackheads, wrinkles, enlarged pores",
       ],
     },
     {
@@ -109,7 +109,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
   return (
     <section
       id="how-it-works"
-      className={cn("w-full bg-[#FBFBFA] px-4 py-24 sm:py-32", className)}
+      className={cn("w-full bg-transparent px-4 py-24 sm:py-32", className)}
       {...props}
     >
       <div className="mx-auto max-w-6xl">
@@ -155,7 +155,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
             {stepsData.map((step) => (
               <motion.div
                 key={step.step}
-                className="flex h-9 w-9 items-center justify-center justify-self-center rounded-full border border-[#EAEAEA] bg-[#EDF3EC] font-mono text-xs font-semibold text-[#346538] ring-8 ring-[#FBFBFA]"
+                className="flex h-9 w-9 items-center justify-center justify-self-center rounded-full border border-[#EAEAEA] bg-[#EDF3EC] font-mono text-xs font-semibold text-[#346538] ring-8 ring-[#F7FBFB]"
                 variants={{
                   hidden: { opacity: 0, y: 10, scale: 0.92 },
                   visible: { opacity: 1, y: 0, scale: 1 },

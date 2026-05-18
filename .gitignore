@@ -11,6 +11,11 @@ node_modules/
 dist/
 build/
 
+# Python
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
 # Logs
 *.log
 

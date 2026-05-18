@@ -17,7 +17,10 @@ export async function analyzeSkinImage({
   });
 
   if (!response.ok) {
-    throw new Error("Skin analysis failed. Try another image.");
+    const payload = await response.json().catch(() => null);
+    const message =
+      payload?.detail?.message ?? "Skin analysis failed. Try another image.";
+    throw new Error(message);
   }
 
   return response.json() as Promise<SkinAnalysisResult>;

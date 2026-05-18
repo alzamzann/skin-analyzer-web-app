@@ -6,7 +6,7 @@ import { MotionReveal } from "@/features/landing/components/MotionReveal";
 
 export function CTASection() {
   return (
-    <section id="pricing" className="w-full bg-[#FBFBFA] px-4 pb-24 pt-2 sm:pb-32">
+    <section id="pricing" className="w-full bg-transparent px-4 pb-24 pt-2 sm:pb-32">
       <div className="mx-auto max-w-6xl">
         <MotionReveal>
         <div className="rounded-[12px] border border-[#EAEAEA] bg-white p-6 sm:p-8 lg:p-10">

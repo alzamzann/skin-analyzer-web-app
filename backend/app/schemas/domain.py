@@ -7,6 +7,7 @@ class IngredientRecord:
     ingredient_type: str | None = None
     alternate_name: str | None = None
     inci_name: str | None = None
+    important_chemical_component: str | None = None
     best_for: str | None = None
     can_used_to: str | None = None
     not_recommend: str | None = None

@@ -79,6 +79,9 @@ class CatalogRepository:
                     ingredient_type=_clean_cell(row.get("ingredient_type")),
                     alternate_name=_clean_cell(row.get("alternate_name")),
                     inci_name=_clean_cell(row.get("inci_name")),
+                    important_chemical_component=_clean_cell(
+                        row.get("important_chemical_component")
+                    ),
                     best_for=_clean_cell(row.get("best_for")),
                     can_used_to=_clean_cell(row.get("can_used_to")),
                     not_recommend=_clean_cell(row.get("not_recommend")),

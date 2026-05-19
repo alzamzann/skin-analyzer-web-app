@@ -1,7 +1,7 @@
 from app.repositories.catalog_repository import CatalogRepository
 from app.schemas.analysis import RecommendedIngredient, RecommendedProduct
 from app.schemas.domain import IngredientRecord, ProductRecord
-from app.services.text import normalize_text, split_codes
+from app.services.text import normalize_text, split_codes, split_terms
 
 
 class RecommendationService:
@@ -30,7 +30,7 @@ class RecommendationService:
             if self._is_suitable(ingredient, baumann_type, include_all)
         ]
 
-        return [self._to_ingredient_schema(record) for record in records[:8]]
+        return [self._to_ingredient_schema(record) for record in records]
 
     def recommend_products(
         self,
@@ -38,18 +38,31 @@ class RecommendationService:
         category: str | None = None,
         top_k: int = 5,
     ) -> tuple[list[RecommendedProduct], int]:
-        ingredients = self.recommend_ingredients(baumann_type)
-        ingredient_terms = [ingredient.name for ingredient in ingredients]
+        ingredient_records = [
+            ingredient
+            for ingredient in self.catalog_repository.ingredients
+            if self._is_suitable(ingredient, baumann_type, include_all=True)
+        ]
         products = self.catalog_repository.products
 
         if category and category != "All":
             products = [product for product in products if product.category == category]
 
         scored = [
-            self._score_product(product, ingredient_terms)
+            self._score_product(
+                product=product,
+                ingredient_records=ingredient_records,
+            )
             for product in products
         ]
-        scored.sort(key=lambda product: product.similarity_score, reverse=True)
+        scored = [product for product in scored if product.similarity_score > 0]
+        scored.sort(
+            key=lambda product: (
+                product.similarity_score,
+                len(product.matched_ingredients),
+            ),
+            reverse=True,
+        )
         return scored[:top_k], len(scored)
 
     def _is_suitable(
@@ -82,15 +95,20 @@ class RecommendationService:
         )
 
     def _score_product(
-        self, product: ProductRecord, ingredient_terms: list[str]
+        self,
+        product: ProductRecord,
+        ingredient_records: list[IngredientRecord],
     ) -> RecommendedProduct:
         normalized_product_ingredients = normalize_text(product.ingredients)
-        matched = [
-            term
-            for term in ingredient_terms
-            if normalize_text(term) and normalize_text(term) in normalized_product_ingredients
-        ]
-        score = round(len(matched) / max(len(ingredient_terms), 1), 3)
+        matched = []
+
+        for ingredient in ingredient_records:
+            if self._ingredient_matches_product(
+                ingredient, normalized_product_ingredients
+            ):
+                matched.append(ingredient.name)
+
+        score = round(len(matched) / max(len(ingredient_records), 1), 3)
 
         return RecommendedProduct(
             id=product.bpom_id or normalize_text(product.name).replace(" ", "-"),
@@ -105,3 +123,21 @@ class RecommendationService:
             matched_ingredients=matched,
             similarity_score=score,
         )
+
+    def _ingredient_matches_product(
+        self, ingredient: IngredientRecord, normalized_product_ingredients: str
+    ) -> bool:
+        terms = self._ingredient_match_terms(ingredient)
+        return any(term in normalized_product_ingredients for term in terms)
+
+    def _ingredient_match_terms(self, ingredient: IngredientRecord) -> list[str]:
+        terms = split_terms(ingredient.inci_name)
+
+        cleaned_terms = []
+        for term in terms:
+            if not term or len(term) < 3:
+                continue
+            if term not in cleaned_terms:
+                cleaned_terms.append(term)
+
+        return cleaned_terms

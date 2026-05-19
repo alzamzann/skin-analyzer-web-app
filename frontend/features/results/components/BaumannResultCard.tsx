@@ -20,12 +20,12 @@ export function BaumannResultCard({
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
-              Your skin result
+              Your Skin Result
             </h1>
             <Sparkles className="h-4 w-4 text-[#0B7A75]" strokeWidth={1.8} />
           </div>
           <p className="mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-[#0B1026]">
-            Baumann skin type
+            Baumann Skin Type
           </p>
           <p className="mt-3 text-7xl font-semibold leading-none tracking-[-0.06em] text-[#0B1026]">
             {baumannType}

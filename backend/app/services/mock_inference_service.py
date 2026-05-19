@@ -1,4 +1,5 @@
 from io import BytesIO
+from collections.abc import Sequence
 
 import numpy as np
 from PIL import Image, UnidentifiedImageError
@@ -18,6 +19,24 @@ LABELS = [
 
 
 class MockInferenceService:
+    def predict_rois(self, roi_images: Sequence[Image.Image]) -> list[LabelPrediction]:
+        if not roi_images:
+            raise AnalysisError(
+                "No ROI images were available for model inference.",
+                "model_inference_failed",
+            )
+
+        tile_size = roi_images[0].size[0]
+        canvas = Image.new("RGB", (tile_size * 2, tile_size * 2), color=(255, 255, 255))
+        for index, roi_image in enumerate(roi_images[:4]):
+            x = (index % 2) * tile_size
+            y = (index // 2) * tile_size
+            canvas.paste(roi_image.convert("RGB"), (x, y))
+
+        buffer = BytesIO()
+        canvas.save(buffer, format="JPEG", quality=90)
+        return self.predict(buffer.getvalue())
+
     def predict(self, image_bytes: bytes) -> list[LabelPrediction]:
         try:
             image = Image.open(BytesIO(image_bytes)).convert("RGB")

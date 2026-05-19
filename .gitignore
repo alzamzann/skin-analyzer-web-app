@@ -18,6 +18,10 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 backend/app/ml_models/*.task
+backend/app/ml_models/*.pt
+backend/app/ml_models/*.pth
+backend/app/ml_models/*.onnx
+backend/app/ml_models/*.ckpt
 
 # Logs
 *.log

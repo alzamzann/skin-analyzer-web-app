@@ -2,7 +2,6 @@ from uuid import uuid4
 
 from app.schemas.analysis import AnalysisResult
 from app.services.baumann_service import BaumannService
-from app.services.mock_inference_service import MockInferenceService
 from app.services.recommendation_service import RecommendationService
 from app.services.roi_service import (
     LandmarkDetectionResult,
@@ -21,7 +20,7 @@ DISCLAIMER = (
 class AnalysisService:
     def __init__(
         self,
-        inference_service: MockInferenceService,
+        inference_service,
         baumann_service: BaumannService,
         recommendation_service: RecommendationService,
         roi_service: RoiService,
@@ -33,8 +32,8 @@ class AnalysisService:
 
     def analyze(self, image_bytes: bytes) -> AnalysisResult:
         roi_result = self.roi_service.extract(image_bytes)
-        predictions = self.inference_service.predict(
-            roi_result.to_inference_image_bytes()
+        predictions = self.inference_service.predict_rois(
+            [roi.image for roi in roi_result.rois]
         )
         (
             baumann_type,

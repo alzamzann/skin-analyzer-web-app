@@ -131,6 +131,66 @@ http://127.0.0.1:8000/docs
 
 Use the docs page for the easiest file upload flow.
 
+## 5.1 Real Model Inference
+
+Put the skin model file in:
+
+```txt
+backend/app/ml_models/
+```
+
+Current model filename:
+
+```txt
+backend/app/ml_models/best_efficientnet_b0_v1.pt
+```
+
+Model files are ignored by git.
+
+Install optional CUDA model dependencies:
+
+```bash
+cd /home/alzamzann/skin-analyzer/skin-analyzer-web-app/backend
+conda activate skin-backend
+python -m pip install -r requirements-ml.txt
+```
+
+Current `requirements-ml.txt` uses PyTorch CUDA 13.0 wheels:
+
+```txt
+--index-url https://download.pytorch.org/whl/cu130
+torch==2.11.0
+torchvision==0.26.0
+```
+
+Check PyTorch and CUDA visibility:
+
+```bash
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.version.cuda)"
+```
+
+Enable real inference by setting:
+
+```env
+DERMALYZER_MOCK_INFERENCE_ENABLED=false
+DERMALYZER_SKIN_MODEL_PATH=backend/app/ml_models/best_efficientnet_b0_v1.pt
+DERMALYZER_SKIN_MODEL_ARCH=efficientnet_b0
+DERMALYZER_SKIN_MODEL_THRESHOLD=0.7
+```
+
+Current model label order:
+
+```txt
+Acne
+Blackheads
+Enlarged Pores
+Pigmentation
+Redness
+Wrinkles
+```
+
+If `DERMALYZER_MOCK_INFERENCE_ENABLED=true`, the backend keeps using the deterministic mock inference service.
+
 ## 6. ROI Preview
 
 Endpoint:

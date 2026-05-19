@@ -18,6 +18,22 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "s3-ap-southeast-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.soco.id",
+      },
+      {
+        protocol: "https",
+        hostname: "incidecoder-content.storage.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.sociolla.com",
+      },
     ],
   },
 };

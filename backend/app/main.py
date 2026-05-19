@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.dependencies import get_roi_service
 from app.api.routes import analyze, health, recommendations
 from app.core.config import get_settings
 
@@ -21,6 +22,10 @@ def create_app() -> FastAPI:
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(analyze.router, prefix=settings.api_prefix)
     app.include_router(recommendations.router, prefix=settings.api_prefix)
+
+    @app.on_event("shutdown")
+    def close_face_detection_resources() -> None:
+        get_roi_service().face_detection_service.close()
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(

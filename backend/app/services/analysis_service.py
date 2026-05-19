@@ -4,6 +4,12 @@ from app.schemas.analysis import AnalysisResult
 from app.services.baumann_service import BaumannService
 from app.services.mock_inference_service import MockInferenceService
 from app.services.recommendation_service import RecommendationService
+from app.services.roi_service import (
+    LandmarkDetectionResult,
+    LandmarkCropResult,
+    RoiExtractionResult,
+    RoiService,
+)
 
 
 DISCLAIMER = (
@@ -18,13 +24,18 @@ class AnalysisService:
         inference_service: MockInferenceService,
         baumann_service: BaumannService,
         recommendation_service: RecommendationService,
+        roi_service: RoiService,
     ):
         self.inference_service = inference_service
         self.baumann_service = baumann_service
         self.recommendation_service = recommendation_service
+        self.roi_service = roi_service
 
     def analyze(self, image_bytes: bytes) -> AnalysisResult:
-        predictions = self.inference_service.predict(image_bytes)
+        roi_result = self.roi_service.extract(image_bytes)
+        predictions = self.inference_service.predict(
+            roi_result.to_inference_image_bytes()
+        )
         (
             baumann_type,
             attributes,
@@ -47,4 +58,22 @@ class AnalysisService:
             recommended_products=products,
             available_filters=self.recommendation_service.get_available_filters(),
             disclaimer=DISCLAIMER,
+        )
+
+    def extract_roi_preview(self, image_bytes: bytes) -> RoiExtractionResult:
+        return self.roi_service.extract(image_bytes)
+
+    def extract_landmark_preview(self, image_bytes: bytes) -> LandmarkDetectionResult:
+        return self.roi_service.detect_landmarks(image_bytes)
+
+    def crop_from_landmark(
+        self,
+        image_bytes: bytes,
+        landmark_index: int,
+        crop_size: int,
+    ) -> LandmarkCropResult:
+        return self.roi_service.crop_from_landmark(
+            image_bytes=image_bytes,
+            landmark_index=landmark_index,
+            crop_size=crop_size,
         )

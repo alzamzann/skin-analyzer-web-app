@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Leaf, Star } from "lucide-react";
 
 import { Navbar } from "@/components/layout/Navbar";
@@ -20,93 +20,57 @@ import type {
   SkinAttribute,
 } from "@/features/results/types/result.types";
 
-const attributes: SkinAttribute[] = [
-  { label: "Oily", value: 82 },
-  { label: "Sensitive", value: 58 },
-  { label: "Pigmented", value: 76 },
-  { label: "Tight", value: 26 },
-];
-
-const ingredients: Ingredient[] = [
-  {
-    name: "Niacinamide",
-    reason: "Balances oil and supports uneven tone.",
-  },
-  {
-    name: "Salicylic Acid (BHA)",
-    reason: "Helps refine pores and reduce congestion.",
-  },
-  {
-    name: "Tranexamic Acid",
-    reason: "Supports visible discoloration concerns.",
-  },
-  {
-    name: "Centella Asiatica",
-    reason: "Calms visible sensitivity and redness.",
-  },
-  {
-    name: "Zinc PCA",
-    reason: "Supports oily and blemish-prone skin.",
-  },
-];
-
-const products: ProductRecommendation[] = [
-  {
-    id: "cleanser-1",
-    name: "Gentle Hydrating Cleanser",
-    brand: "Dermalyzer Lab",
-    category: "Cleanser",
-    description: "Gently cleanses while maintaining skin moisture balance.",
-    imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80",
-    price: 185000,
-  },
-  {
-    id: "serum-1",
-    name: "10% Niacinamide Serum",
-    brand: "Dermalyzer Lab",
-    category: "Serum",
-    description: "Visibly reduces excess oil and improves skin tone.",
-    imageUrl: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=400&q=80",
-    price: 249000,
-  },
-  {
-    id: "moisturizer-1",
-    name: "Oil-Free Gel Moisturizer",
-    brand: "Dermalyzer Lab",
-    category: "Moisturizer",
-    description: "Lightweight hydration that soothes and softens skin.",
-    imageUrl: "https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?auto=format&fit=crop&w=400&q=80",
-    price: 215000,
-  },
-  {
-    id: "sunscreen-1",
-    name: "Daily Defense SPF 50+",
-    brand: "Dermalyzer Lab",
-    category: "Sunscreen",
-    description: "Broad-spectrum protection with a clean matte finish.",
-    imageUrl: "https://images.unsplash.com/photo-1598662972299-5408ddb8a3dc?auto=format&fit=crop&w=400&q=80",
-    price: 199000,
-  },
-  {
-    id: "toner-1",
-    name: "Barrier Comfort Toner",
-    brand: "Dermalyzer Lab",
-    category: "Toner",
-    description: "Prepares sensitive skin with light calming hydration.",
-    imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80",
-    price: 169000,
-  },
-];
-
 export default function ResultPage() {
-  const [analysisResult] = useState<SkinAnalysisResult | null>(
-    () => readAnalysisResult(),
+  const [hasLoadedAnalysis, setHasLoadedAnalysis] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<SkinAnalysisResult | null>(
+    null,
   );
-  const resultProducts = useMemo<ProductRecommendation[]>(() => {
-    if (!analysisResult) {
-      return products;
-    }
 
+  useEffect(() => {
+    setAnalysisResult(readAnalysisResult());
+    setHasLoadedAnalysis(true);
+  }, []);
+
+  return (
+    <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#F7FBFB_0%,#EBEBEB_48%,#FFFFFF_100%)] text-[#0B1026]">
+      <Navbar
+        action={
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link href="/analyze">
+              <ArrowLeft className="h-4 w-4" />
+              Analyze Again
+            </Link>
+          </Button>
+        }
+        brandHref="/"
+        className="bg-transparent"
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Analyze", href: "/analyze" },
+          { label: "Ingredients", href: "#ingredients" },
+          { label: "Products", href: "#products" },
+        ]}
+      />
+
+      <div className="mx-auto w-full max-w-6xl px-4 pb-14 pt-9 sm:px-6 lg:px-8">
+        {!hasLoadedAnalysis ? (
+          <ResultLoadingState />
+        ) : analysisResult ? (
+          <AnalysisResultContent analysisResult={analysisResult} />
+        ) : (
+          <NoAnalysisFound />
+        )}
+      </div>
+    </main>
+  );
+}
+
+function AnalysisResultContent({
+  analysisResult,
+}: {
+  analysisResult: SkinAnalysisResult;
+}) {
+  const resultProducts = useMemo<ProductRecommendation[]>(() => {
     return analysisResult.recommendedProducts.map((product) => ({
       id: product.id,
       bpomId: product.bpomId,
@@ -122,10 +86,6 @@ export default function ResultPage() {
     }));
   }, [analysisResult]);
   const resultIngredients = useMemo<Ingredient[]>(() => {
-    if (!analysisResult) {
-      return ingredients;
-    }
-
     return analysisResult.recommendedIngredients.map((ingredient) => ({
       name: ingredient.name,
       reason: ingredient.reason,
@@ -140,10 +100,6 @@ export default function ResultPage() {
     }));
   }, [analysisResult]);
   const resultAttributes = useMemo<SkinAttribute[]>(() => {
-    if (!analysisResult) {
-      return attributes;
-    }
-
     return [
       {
         label: analysisResult.baumannMapping.oiliness,
@@ -164,50 +120,19 @@ export default function ResultPage() {
     ];
   }, [analysisResult]);
   const availableFilters = useMemo(
-    () =>
-      analysisResult?.availableFilters ?? [
-        "All",
-        "Cleanser",
-        "Serum",
-        "Moisturizer",
-        "Sunscreen",
-        "Toner",
-      ],
+    () => analysisResult.availableFilters,
     [analysisResult],
   );
   const { category, filteredProducts, setCategory } =
     useProductFilter(resultProducts);
 
   return (
-    <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#F7FBFB_0%,#EBEBEB_48%,#FFFFFF_100%)] text-[#0B1026]">
-      <Navbar
-        action={
-          <Button asChild variant="outline" size="sm" className="gap-2">
-            <Link href="/analyze">
-              <ArrowLeft className="h-4 w-4" />
-              Analyze again
-            </Link>
-          </Button>
-        }
-        brandHref="/"
-        className="bg-transparent"
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Analyze", href: "/analyze" },
-          { label: "Ingredients", href: "#ingredients" },
-          { label: "Products", href: "#products" },
-        ]}
-      />
-
-      <div className="mx-auto w-full max-w-6xl px-4 pb-14 pt-9 sm:px-6 lg:px-8">
+    <>
         <section className="overflow-hidden rounded-[24px] border border-[#EAEAEA] bg-white/95 shadow-[0_24px_80px_rgba(0,38,43,0.08)] md:grid md:grid-cols-[1fr_1fr]">
           <BaumannResultCard
-            baumannType={analysisResult?.baumannType ?? "OSPT"}
-            confidence={analysisResult?.confidence ?? 0.91}
-            description={
-              analysisResult?.description ??
-              "Your skin is oily, sensitive, pigmented, and tight. Focus on balancing oil, calming sensitivity, fading discoloration, and reinforcing hydration."
-            }
+            baumannType={analysisResult.baumannType}
+            confidence={analysisResult.confidence}
+            description={analysisResult.description}
           />
           <SkinAttributeSummary attributes={resultAttributes} />
         </section>
@@ -218,7 +143,7 @@ export default function ResultPage() {
               <Leaf className="h-5 w-5" strokeWidth={1.7} />
             </span>
             <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
-              Recommended ingredients
+              Recommended Ingredients
             </h2>
           </div>
           <IngredientList ingredients={resultIngredients} />
@@ -230,7 +155,7 @@ export default function ResultPage() {
               <Star className="h-5 w-5" strokeWidth={1.7} />
             </span>
             <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
-              Top 5 product recommendations
+              Top 5 Product Recommendations
             </h2>
           </div>
           <ProductCategoryFilter
@@ -243,7 +168,7 @@ export default function ResultPage() {
           </div>
         </section>
 
-        {analysisResult?.disclaimer && (
+        {analysisResult.disclaimer && (
           <section className="mt-12 rounded-[18px] border border-[#EAEAEA] bg-white p-5 text-sm leading-6 text-[#4F6466]">
             {analysisResult.disclaimer}
           </section>
@@ -263,7 +188,43 @@ export default function ResultPage() {
             © 2026 Dermalyzer. Educational skin analysis only.
           </p>
         </footer>
+    </>
+  );
+}
+
+function ResultLoadingState() {
+  return (
+    <section className="grid min-h-[58vh] place-items-center rounded-[24px] border border-[#EAEAEA] bg-white/95 p-8 text-center shadow-[0_24px_80px_rgba(0,38,43,0.08)]">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B7A75]">
+          Result
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#0B1026]">
+          Loading analysis
+        </h1>
       </div>
-    </main>
+    </section>
+  );
+}
+
+function NoAnalysisFound() {
+  return (
+    <section className="grid min-h-[58vh] place-items-center rounded-[24px] border border-[#EAEAEA] bg-white/95 p-8 text-center shadow-[0_24px_80px_rgba(0,38,43,0.08)]">
+      <div className="max-w-md">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B7A75]">
+          No analysis found
+        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-[-0.03em] text-[#0B1026]">
+          Start with a face photo.
+        </h1>
+        <p className="mt-4 text-base leading-7 text-[#4F6466]">
+          This page only shows results after an image has been analyzed in the
+          current browser session.
+        </p>
+        <Button asChild className="mt-8">
+          <Link href="/analyze">Go to analyzer</Link>
+        </Button>
+      </div>
+    </section>
   );
 }

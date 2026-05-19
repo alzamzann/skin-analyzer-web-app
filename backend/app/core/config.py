@@ -11,7 +11,11 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     max_upload_size_bytes: int = 8 * 1024 * 1024
     data_dir: Path = Path(__file__).resolve().parents[1] / "data"
+    face_landmarker_model_path: Path = (
+        Path(__file__).resolve().parents[1] / "ml_models" / "face_landmarker.task"
+    )
     mock_inference_enabled: bool = True
+    roi_crop_size: int = 224
 
     model_config = SettingsConfigDict(
         env_file=".env",

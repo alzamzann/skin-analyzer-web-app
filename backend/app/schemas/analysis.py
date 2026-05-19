@@ -78,6 +78,56 @@ class AnalysisResult(CamelModel):
     disclaimer: str
 
 
+class BoundingBox(CamelModel):
+    x: int
+    y: int
+    width: int
+    height: int
+
+
+class FaceMetadata(CamelModel):
+    bounding_box: BoundingBox
+    landmark_count: int
+
+
+class RoiPreview(CamelModel):
+    region: str
+    bounding_box: BoundingBox
+    image_data_url: str
+
+
+class RoiPreviewResponse(CamelModel):
+    face: FaceMetadata
+    rois: list[RoiPreview]
+
+
+class LandmarkPoint(CamelModel):
+    index: int
+    x: float
+    y: float
+    z: float
+    pixel_x: int
+    pixel_y: int
+
+
+class LandmarkPreviewResponse(CamelModel):
+    image_width: int
+    image_height: int
+    face: FaceMetadata
+    annotated_image_data_url: str
+    landmarks: list[LandmarkPoint]
+
+
+class LandmarkCropPreviewResponse(CamelModel):
+    image_width: int
+    image_height: int
+    face: FaceMetadata
+    landmark: LandmarkPoint
+    source_bounding_box: BoundingBox
+    crop_size: int
+    crop_image_data_url: str
+
+
 class IngredientListResponse(CamelModel):
     baumann_type: str
     include_all: bool

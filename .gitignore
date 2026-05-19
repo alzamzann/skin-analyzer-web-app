@@ -1,5 +1,7 @@
 # Ignore markdown
 *.md
+!PRDv2.md
+!REVIEW_WORKFLOWS.md
 
 # Node modules
 node_modules/
@@ -15,6 +17,7 @@ build/
 __pycache__/
 .pytest_cache/
 *.py[cod]
+backend/app/ml_models/*.task
 
 # Logs
 *.log

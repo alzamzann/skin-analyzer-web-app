@@ -1,6 +1,16 @@
 from app.repositories.catalog_repository import CatalogRepository
-from app.schemas.analysis import RecommendedIngredient, RecommendedProduct
+from app.schemas.analysis import (
+    ProductCategoryFilter,
+    RecommendedIngredient,
+    RecommendedProduct,
+)
 from app.schemas.domain import IngredientRecord, ProductRecord
+from app.services.product_categories import (
+    ROUTINE_MAIN_CATEGORY_ORDER,
+    get_main_category,
+    group_available_subcategories,
+    normalize_subcategory,
+)
 from app.services.text import normalize_text, split_codes, split_terms
 
 
@@ -9,17 +19,25 @@ class RecommendationService:
         self.catalog_repository = catalog_repository
 
     def get_available_filters(self) -> list[str]:
-        categories = {
-            product.category
-            for product in self.catalog_repository.products
-            if product.category in {"Cleanser", "Moisturizer", "Sun Care"}
-        }
-        ordered = [
-            category
-            for category in ["Cleanser", "Moisturizer", "Sun Care"]
-            if category in categories
+        return [
+            "All",
+            *[
+                subcategory
+                for category_filter in self.get_product_category_filters()
+                for subcategory in category_filter.sub_categories
+            ],
         ]
-        return ["All", *ordered]
+
+    def get_product_category_filters(self) -> list[ProductCategoryFilter]:
+        return [
+            ProductCategoryFilter(
+                main_category=main_category,
+                sub_categories=subcategories,
+            )
+            for main_category, subcategories in group_available_subcategories(
+                self.catalog_repository.products
+            ).items()
+        ]
 
     def recommend_ingredients(
         self, baumann_type: str, include_all: bool = True
@@ -36,6 +54,8 @@ class RecommendationService:
         self,
         baumann_type: str,
         category: str | None = None,
+        main_category: str | None = None,
+        sub_category: str | None = None,
         top_k: int = 5,
     ) -> tuple[list[RecommendedProduct], int]:
         ingredient_records = [
@@ -43,10 +63,11 @@ class RecommendationService:
             for ingredient in self.catalog_repository.ingredients
             if self._is_suitable(ingredient, baumann_type, include_all=True)
         ]
-        products = self.catalog_repository.products
-
-        if category and category != "All":
-            products = [product for product in products if product.category == category]
+        products = self._filter_products(
+            category=category,
+            main_category=main_category,
+            sub_category=sub_category,
+        )
 
         scored = [
             self._score_product(
@@ -64,6 +85,100 @@ class RecommendationService:
             reverse=True,
         )
         return scored[:top_k], len(scored)
+
+    def recommend_routine_products(self, baumann_type: str) -> list[RecommendedProduct]:
+        available_main_categories = {
+            category_filter.main_category
+            for category_filter in self.get_product_category_filters()
+        }
+        routine_products = []
+
+        for main_category in ROUTINE_MAIN_CATEGORY_ORDER:
+            if main_category not in available_main_categories:
+                continue
+
+            products, _ = self.recommend_products(
+                baumann_type=baumann_type,
+                main_category=main_category,
+                top_k=1,
+            )
+            routine_products.extend(products)
+
+        return routine_products
+
+    def _filter_products(
+        self,
+        category: str | None,
+        main_category: str | None,
+        sub_category: str | None,
+    ) -> list[ProductRecord]:
+        groups = group_available_subcategories(self.catalog_repository.products)
+        normalized_main = self._normalize_main_category(main_category, groups)
+        legacy_subcategory = None if category in {None, "All"} else category
+
+        if legacy_subcategory and sub_category:
+            if normalize_subcategory(legacy_subcategory) != normalize_subcategory(
+                sub_category
+            ):
+                raise ValueError("category and subCategory must identify the same category")
+
+        selected_subcategory = sub_category or legacy_subcategory
+        normalized_subcategory = (
+            normalize_subcategory(selected_subcategory)
+            if selected_subcategory and selected_subcategory != "All"
+            else None
+        )
+
+        if normalized_subcategory:
+            available_subcategories = {
+                subcategory
+                for subcategories in groups.values()
+                for subcategory in subcategories
+            }
+            if normalized_subcategory not in available_subcategories:
+                raise ValueError(f"Unknown subcategory: {selected_subcategory}")
+            if normalized_main and normalized_subcategory not in groups[normalized_main]:
+                raise ValueError(
+                    f"Subcategory {normalized_subcategory} does not belong to "
+                    f"{normalized_main}"
+                )
+
+        if normalized_subcategory:
+            return [
+                product
+                for product in self.catalog_repository.products
+                if product.category == normalized_subcategory
+            ]
+
+        if normalized_main:
+            allowed_subcategories = set(groups[normalized_main])
+            return [
+                product
+                for product in self.catalog_repository.products
+                if product.category in allowed_subcategories
+            ]
+
+        return self.catalog_repository.products
+
+    def _normalize_main_category(
+        self,
+        main_category: str | None,
+        groups: dict[str, list[str]],
+    ) -> str | None:
+        if not main_category or main_category == "All":
+            return None
+
+        matching_category = next(
+            (
+                category
+                for category in groups
+                if category.casefold() == main_category.strip().casefold()
+            ),
+            None,
+        )
+        if matching_category is None:
+            raise ValueError(f"Unknown main category: {main_category}")
+        return matching_category
 
     def _is_suitable(
         self, ingredient: IngredientRecord, baumann_type: str, include_all: bool
@@ -116,6 +231,8 @@ class RecommendationService:
             name=product.name,
             brand=product.brand,
             category=product.category,
+            main_category=get_main_category(product.category),
+            sub_category=product.category,
             description=product.description,
             price=product.price,
             image_url=product.image_url,

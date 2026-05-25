@@ -29,7 +29,7 @@ This PRD is revised based on the provided datasets:
 - The file currently has one unnamed trailing column that should be removed or ignored during data loading.
 
 #### `products.csv`
-- Total rows: **187 products**
+- Product count and category values are read from the current CSV dataset.
 - Key columns:
   - `bpom_id`
   - `name`
@@ -41,11 +41,7 @@ This PRD is revised based on the provided datasets:
   - `image_url`
   - `product_url`
   - `incidecoder_verif`
-- Current product categories:
-  - `Cleanser`
-  - `Moisturizer`
-  - `Sun Care`
-- The dataset does **not currently contain a Serum category**, so the MVP product filters should follow the available dataset: `Cleanser`, `Moisturizer`, and `Sun Care`.
+- Product filters must be derived from the categories available in the loaded dataset.
 - The `incidecoder_verif` column is mostly empty and should not be required for MVP recommendation logic.
 
 ### Main Output
@@ -54,8 +50,8 @@ The system should return:
 - Explanation of each Baumann parameter
 - Detected ML labels and confidence scores
 - Recommended ingredients from `ingredients.csv`
-- Top 5 product recommendations from `products.csv`
-- Product filtering by available product category
+- An initial routine recommendation with the top matching Cleanser, Treatment, Moisturizer, and Sunscreen product from `products.csv`
+- Product filtering by product main category and subcategory
 
 ### Non-Goal
 The system must not present results as a medical diagnosis. It should be positioned as a skincare recommendation and educational tool.
@@ -139,8 +135,11 @@ DSPT
 #### Product Recommendation
 - The system reads `products.csv`.
 - The system compares recommended ingredients against each product's `ingredients` field.
-- The system ranks products using cosine similarity or ingredient overlap scoring.
-- The system returns the Top 5 products overall and optionally Top 5 per category.
+- The system matches products only against the `INCI_NAME` values of compatible ingredient records.
+- The system calculates an ingredient coverage score: matched compatible ingredient records divided by total compatible ingredient records for the Baumann type.
+- A recommended product does not need to contain every compatible ingredient; requiring full coverage would exclude valid products from the current catalog.
+- The initial result returns one top-ranked product for each routine main category in order: Cleanser, Treatment, Moisturizer, Sunscreen.
+- Selecting a main category or subcategory returns its Top 5 ranked products.
 - Product recommendation output should include:
   - BPOM ID
   - product name
@@ -155,11 +154,12 @@ DSPT
 #### Product Filters
 For the current dataset, product filters should be:
 - All
-- Cleanser
-- Moisturizer
-- Sun Care
+- Treatment: Toner, Essence, Face Serum, Booster, Ampoule
+- Cleanser: Face Wash, Cleansing Oil, Cleansing Balm, Cleansing Cream, Cleansing Gel, Scrub And Exfoliator, Micellar Water, Peeling
+- Moisturizer: Face Oil, Face Cream And Lotion, Face Mist, Face Gel
+- Sunscreen: Sunscreen
 
-A `Serum` filter should only be added after serum products exist in the dataset.
+Unmapped future CSV categories should remain selectable under `Other`.
 
 ### Non-Functional Requirements
 
@@ -258,29 +258,43 @@ Recommended ingredient card fields:
 ### 3.7 Product Recommendation
 The system recommends products from `products.csv` based on matched ingredients.
 
+Recommendation rules:
+- Only normalized `INCI_NAME` values from compatible ingredient records determine product matches.
+- Each compatible ingredient record contributes at most one match, even if several of its INCI variants occur in the product.
+- The score represents coverage of compatible ingredients, not a requirement for one product to contain all suitable ingredients.
+- A product with partial coverage may be recommended when it ranks highest within the active product scope.
+- The initial result is a routine overview: one top-ranked product each for Cleanser, Treatment, Moisturizer, and Sunscreen.
+- Category browsing returns Top 5 results within the selected main category or subcategory.
+
 Recommended product card fields:
 - Product image
 - Product name
 - Brand
 - Category
-- Price
 - BPOM ID
 - Matched ingredients
 - Similarity score
 - Product link
 
+Product descriptions and prices may remain available in the API/catalog data but are not displayed in recommendation cards.
+
 ### 3.8 Product Category Filter
 The result page allows users to filter recommendations by:
 - All
+- Treatment
 - Cleanser
 - Moisturizer
-- Sun Care
+- Sunscreen
+
+Treatment, Cleanser, and Moisturizer expose their available subcategories. Sunscreen is a main-only filter in the result UI.
 
 ### 3.9 Recommendation Transparency
 Each product recommendation should explain why it was recommended by showing:
 - matched beneficial ingredients
 - similarity score
 - product category
+
+When the recommended ingredient list includes `Retinol` or `Hydroquinone`, the result page should display a pregnancy caution directly below the ingredient list advising pregnant users to avoid products containing the displayed caution ingredients and consult a qualified clinician.
 
 ---
 
@@ -306,9 +320,9 @@ flowchart TD
     M --> N[Generate Baumann Skin Type]
     N --> O[Filter ingredients.csv by best_for]
     O --> P[Match recommended ingredients with products.csv ingredients]
-    P --> Q[Calculate similarity scores]
+    P --> Q[Calculate compatible ingredient coverage scores]
     Q --> R[Return result JSON]
-    R --> S[Display Baumann type, ingredients, and Top 5 products]
+    R --> S[Display Baumann type, ingredients, and initial routine products]
     S --> T[User filters products by category]
 ```
 
@@ -338,9 +352,9 @@ flowchart TD
     E --> F[Read products.csv]
     F --> G[Normalize product ingredients]
     G --> H[Compare with recommended ingredients]
-    H --> I[Calculate similarity score]
+    H --> I[Calculate compatible ingredient coverage score]
     I --> J[Rank products]
-    J --> K[Return Top 5 recommendations]
+    J --> K[Return routine overview or filtered Top 5 recommendations]
 ```
 
 ---
@@ -357,7 +371,7 @@ flowchart TD
 | ML Framework | PyTorch |
 | Face Detection | MediaPipe |
 | Model Architecture | EfficientNet |
-| Recommendation Logic | Python cosine similarity / ingredient matching |
+| Recommendation Logic | Python INCI matching / compatible ingredient coverage |
 | MVP Dataset Storage | CSV files |
 | Future Dataset Storage | PostgreSQL |
 
@@ -495,7 +509,9 @@ Response example based on the current CSV structure:
       "bpom_id": "NA11251200510",
       "name": "5X Ceramide Low PH Cleanser",
       "brand": "Skintific",
-      "category": "Cleanser",
+      "category": "Face Wash",
+      "mainCategory": "Cleanser",
+      "subCategory": "Face Wash",
       "description": "pH balanced face cleanser suitable for sensitive skin with 5 types of Ceramides, Niacinamide, and Hyaluronic Acid.",
       "price": "45.650,00",
       "similarity_score": 0.91,
@@ -508,7 +524,9 @@ Response example based on the current CSV structure:
       "bpom_id": "NA11231201019",
       "name": "Mugwort Purifying Micellar Water",
       "brand": "Skintific",
-      "category": "Cleanser",
+      "category": "Micellar Water",
+      "mainCategory": "Cleanser",
+      "subCategory": "Micellar Water",
       "description": "Micellar water with Mugwort, Centella, and Ceramide for cleansing while maintaining skin moisture.",
       "price": "69.500,00",
       "similarity_score": 0.84,
@@ -518,19 +536,25 @@ Response example based on the current CSV structure:
       "incidecoder_verif": null
     }
   ],
-  "available_filters": ["All", "Cleanser", "Moisturizer", "Sun Care"]
+  "productCategoryFilters": [
+    {"mainCategory": "Treatment", "subCategories": ["Toner", "Essence", "Face Serum", "Booster", "Ampoule"]},
+    {"mainCategory": "Cleanser", "subCategories": ["Face Wash", "Cleansing Oil", "Cleansing Balm", "Cleansing Cream", "Cleansing Gel", "Scrub And Exfoliator", "Micellar Water", "Peeling"]},
+    {"mainCategory": "Moisturizer", "subCategories": ["Face Oil", "Face Cream And Lotion", "Face Mist", "Face Gel"]},
+    {"mainCategory": "Sunscreen", "subCategories": ["Sunscreen"]}
+  ]
 }
 ```
 
-#### `GET /api/products/recommendations?baumann_type=DSPT&category=Cleanser`
-Returns product recommendations for a Baumann type and optional category. The `category` value should match the current `products.csv` categories: `Cleanser`, `Moisturizer`, or `Sun Care`.
+#### `GET /api/products?baumannType=DSPT&mainCategory=Cleanser&subCategory=Face%20Wash`
+Returns product recommendations for a Baumann type and optional main/subcategory selection. The legacy `category` query remains available as a subcategory alias during migration.
 
 Response example:
 
 ```json
 {
   "baumann_type": "DSPT",
-  "category": "Cleanser",
+  "mainCategory": "Cleanser",
+  "subCategory": "Face Wash",
   "total_candidates": 81,
   "top_k": 5,
   "products": [
@@ -538,7 +562,9 @@ Response example:
       "bpom_id": "NA11251200510",
       "name": "5X Ceramide Low PH Cleanser",
       "brand": "Skintific",
-      "category": "Cleanser",
+      "category": "Face Wash",
+      "mainCategory": "Cleanser",
+      "subCategory": "Face Wash",
       "price": "45.650,00",
       "matched_ingredients": ["Ceramides", "Hyaluronic Acid", "Niacinamide"],
       "similarity_score": 0.91,
@@ -589,20 +615,21 @@ def recommend_products(baumann_type, ingredients_df, products_df, category=None,
 
     for _, product in products_df.iterrows():
         product_ingredients = normalize_ingredient_text(product["ingredients"])
-        matched = match_ingredients(suitable_ingredients, product_ingredients)
-        score = calculate_similarity(suitable_ingredients, product_ingredients)
+        matched = match_inci_names(suitable_ingredients, product_ingredients)
+        score = len(matched) / max(len(suitable_ingredients), 1)
 
-        results.append({
-            "bpom_id": product["bpom_id"],
-            "name": product["name"],
-            "brand": product["brand"],
-            "category": product["category"],
-            "price": product["price"],
-            "similarity_score": score,
-            "matched_ingredients": matched,
-            "image_url": product["image_url"],
-            "product_url": product["product_url"]
-        })
+        if score > 0:
+            results.append({
+                "bpom_id": product["bpom_id"],
+                "name": product["name"],
+                "brand": product["brand"],
+                "category": product["category"],
+                "price": product["price"],
+                "similarity_score": score,
+                "matched_ingredients": matched,
+                "image_url": product["image_url"],
+                "product_url": product["product_url"]
+            })
 
     return sorted(results, key=lambda x: x["similarity_score"], reverse=True)[:top_k]
 ```
@@ -626,12 +653,13 @@ def recommend_products(baumann_type, ingredients_df, products_df, category=None,
 - Face detection and ROI extraction use MediaPipe.
 - Model architecture uses EfficientNet.
 - MVP dataset source uses CSV files.
-- Current product categories are limited to `Cleanser`, `Moisturizer`, and `Sun Care`.
-- `Serum` should not be shown as a filter until the dataset includes serum products.
+- Product category filters must be generated from the categories present in `products.csv`.
 - The backend should cache CSV data at startup.
 - The backend should normalize ingredient names before matching.
+- The backend should match products using `INCI_NAME` values only and calculate compatible-ingredient coverage, not cosine similarity.
+- Product recommendation does not require complete coverage of all compatible ingredients.
 - Price values should be parsed carefully because the current dataset uses Indonesian-style formatting, for example `45.650,00`.
-- Product category naming should be standardized in the UI. For example, `Sun Care` can be displayed as `Sunscreen / Sun Care`.
+- Product category naming should be standardized in the UI; the canonical display name for sun-protection products is `Sunscreen`.
 
 ### CSV vs Database Decision
 For the MVP, use CSV because:
@@ -881,11 +909,12 @@ Recommend products based on ingredient matching.
 #### Tasks
 - Parse product `ingredients` field from `products.csv`.
 - Normalize ingredient names.
-- Match recommended ingredients against product composition.
-- Calculate similarity score.
+- Match compatible `INCI_NAME` terms against product composition.
+- Calculate compatible-ingredient coverage score.
 - Rank products.
-- Return Top 5 products.
-- Add category filters for `Cleanser`, `Moisturizer`, and `Sun Care`.
+- Return one top-ranked product per main routine category for the initial result.
+- Return Top 5 products within a selected main category or subcategory.
+- Add category filters derived from the loaded product dataset.
 
 #### Deliverables
 - Product recommendation service.

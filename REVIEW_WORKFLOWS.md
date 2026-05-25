@@ -80,26 +80,32 @@ Audit one Baumann type:
 python scripts/audit_recommendations.py --type DSPT --top-k 5
 ```
 
+Audit the initial routine shown on the result page:
+
+```bash
+python scripts/audit_recommendations.py --type DSPT --routine
+```
+
 Audit multiple Baumann types:
 
 ```bash
 python scripts/audit_recommendations.py --type DSPT --type ORNW --top-k 5
 ```
 
-Audit one category:
+Audit one main category:
 
 ```bash
-python scripts/audit_recommendations.py --type DSPT --category Moisturizer --top-k 10
+python scripts/audit_recommendations.py --type DSPT --main-category Moisturizer --top-k 10
 ```
 
-Available categories:
+Audit one subcategory:
 
-```txt
-All
-Cleanser
-Moisturizer
-Sun Care
+```bash
+python scripts/audit_recommendations.py --type DSPT --main-category Treatment --sub-category "Face Serum" --top-k 10
 ```
+
+The script prints current main/subcategory filters after loading `products.csv`.
+Unmapped CSV category values are reported under `Other`.
 
 Important matching rule:
 
@@ -114,6 +120,15 @@ matched compatible ingredients / total compatible ingredients
 ```
 
 This is a coverage score, not Precision@N and not cosine similarity.
+
+Initial result behavior:
+
+```txt
+Top 1 Cleanser + Top 1 Treatment + Top 1 Moisturizer + Top 1 Sunscreen
+```
+
+Selecting a main category or subcategory in the result page loads its Top 5
+products using the same coverage score.
 
 ## 5. Run Backend API
 

@@ -56,12 +56,19 @@ class RecommendedProduct(CamelModel):
     name: str
     brand: str
     category: str
+    main_category: str
+    sub_category: str
     description: str | None = None
     price: int
     image_url: str | None = None
     product_url: str | None = None
     matched_ingredients: list[str] = Field(default_factory=list)
     similarity_score: float = Field(ge=0, le=1)
+
+
+class ProductCategoryFilter(CamelModel):
+    main_category: str
+    sub_categories: list[str]
 
 
 class AnalysisResult(CamelModel):
@@ -75,6 +82,7 @@ class AnalysisResult(CamelModel):
     recommended_ingredients: list[RecommendedIngredient]
     recommended_products: list[RecommendedProduct]
     available_filters: list[str]
+    product_category_filters: list[ProductCategoryFilter]
     disclaimer: str
 
 
@@ -137,6 +145,8 @@ class IngredientListResponse(CamelModel):
 class ProductListResponse(CamelModel):
     baumann_type: str
     category: str | None = None
+    main_category: str | None = None
+    sub_category: str | None = None
     total_candidates: int
     top_k: int
     products: list[RecommendedProduct]

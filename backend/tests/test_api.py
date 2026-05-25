@@ -10,6 +10,7 @@ from app.api.routes.analyze import preview_face_landmarks
 from app.api.routes.analyze import preview_landmark_crop
 from app.api.routes.analyze import preview_roi_crops
 from app.api.routes.health import health_check
+from app.api.routes.recommendations import list_products
 from app.core.config import get_settings
 from app.services.analysis_service import AnalysisService
 from app.services.baumann_service import BaumannService
@@ -112,7 +113,34 @@ def test_analyze_valid_image_returns_result() -> None:
     assert result.analysis_id
     assert len(result.baumann_type) == 4
     assert result.recommended_products
-    assert result.available_filters == ["All", "Cleanser", "Moisturizer", "Sun Care"]
+    assert result.available_filters[0] == "All"
+    assert {"Face Wash", "Face Serum", "Face Gel", "Sunscreen"}.issubset(
+        result.available_filters
+    )
+    assert [
+        category.main_category for category in result.product_category_filters
+    ] == ["Treatment", "Cleanser", "Moisturizer", "Sunscreen"]
+    assert [product.main_category for product in result.recommended_products] == [
+        "Cleanser",
+        "Treatment",
+        "Moisturizer",
+        "Sunscreen",
+    ]
+
+
+def test_products_can_be_filtered_by_main_category() -> None:
+    result = list_products(
+        baumann_type="DSPT",
+        main_category="Cleanser",
+        sub_category=None,
+        category=None,
+        top_k=5,
+        recommendation_service=get_recommendation_service(),
+    )
+
+    assert result.main_category == "Cleanser"
+    assert result.products
+    assert {product.main_category for product in result.products} == {"Cleanser"}
 
 
 def test_roi_preview_returns_debug_crops() -> None:

@@ -1,7 +1,6 @@
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/Badge";
-import { formatPrice } from "@/lib/utils/formatPrice";
 
 import type { ProductRecommendation } from "../types/result.types";
 
@@ -18,6 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
             src={product.imageUrl}
             alt={product.name}
             fill
+            sizes="(min-width: 640px) 150px, calc(100vw - 3.5rem)"
             className="object-cover"
           />
         ) : (
@@ -28,17 +28,14 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="min-w-0 px-1">
         <Badge className="border-[#0B7A75]/20 bg-[#DDF1EF] px-3.5 py-1.5 text-[0.68rem] uppercase tracking-[0.08em] text-[#006A66]">
-          {product.category}
+          {product.mainCategory
+            ? `${product.mainCategory} / ${product.category}`
+            : product.category}
         </Badge>
         <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-[#0B1026]">
           {product.name}
         </h3>
-        <p className="mt-1 text-sm text-[#4F6466]">
-          {product.description ?? product.brand}
-        </p>
-        <p className="mt-3 text-sm font-semibold text-[#0B7A75]">
-          {formatPrice(product.price)}
-        </p>
+        <p className="mt-1 text-sm text-[#4F6466]">{product.brand}</p>
         {typeof product.similarityScore === "number" && (
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#4F6466]">
             Match {Math.round(product.similarityScore * 100)}%

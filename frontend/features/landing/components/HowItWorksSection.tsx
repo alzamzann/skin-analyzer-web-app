@@ -96,7 +96,7 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
       benefits: [
         "Ingredient match explanations",
         "Top 5 product recommendations",
-        "Cleanser, Moisturizer, Sun Care filters",
+        "Catalog-based product filters",
       ],
     },
   ];

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Leaf, Star } from "lucide-react";
+import { ArrowLeft, Info, Leaf, Star, TriangleAlert } from "lucide-react";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +20,8 @@ import type {
   SkinAttribute,
 } from "@/features/results/types/result.types";
 
+const PREGNANCY_CAUTION_INGREDIENTS = new Set(["Retinol", "Hydroquinone"]);
+
 export default function ResultPage() {
   const [hasLoadedAnalysis, setHasLoadedAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<SkinAnalysisResult | null>(
@@ -27,6 +29,8 @@ export default function ResultPage() {
   );
 
   useEffect(() => {
+    // Session storage is browser-only; load it after hydration to preserve SSR markup.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnalysisResult(readAnalysisResult());
     setHasLoadedAnalysis(true);
   }, []);
@@ -77,6 +81,8 @@ function AnalysisResultContent({
       name: product.name,
       brand: product.brand,
       category: product.category,
+      mainCategory: product.mainCategory,
+      subCategory: product.subCategory,
       description: product.description ?? undefined,
       imageUrl: product.imageUrl,
       price: product.price,
@@ -119,12 +125,20 @@ function AnalysisResultContent({
       },
     ];
   }, [analysisResult]);
-  const availableFilters = useMemo(
-    () => analysisResult.availableFilters,
-    [analysisResult],
-  );
-  const { category, filteredProducts, setCategory } =
-    useProductFilter(resultProducts);
+  const pregnancyCautionIngredients = resultIngredients
+    .filter((ingredient) => PREGNANCY_CAUTION_INGREDIENTS.has(ingredient.name))
+    .map((ingredient) => ingredient.name);
+  const productCategoryFilters = analysisResult.productCategoryFilters ?? [];
+  const {
+    mainCategory,
+    subCategory,
+    products,
+    isLoading,
+    error,
+    selectMainCategory,
+    setSubCategory,
+    retry,
+  } = useProductFilter(resultProducts, analysisResult.baumannType);
 
   return (
     <>
@@ -147,6 +161,29 @@ function AnalysisResultContent({
             </h2>
           </div>
           <IngredientList ingredients={resultIngredients} />
+          {pregnancyCautionIngredients.length > 0 && (
+            <div
+              className="mt-6 flex items-start gap-3 rounded-[16px] border border-[#E9DAB7] bg-[#FFF9ED] p-4 text-[#594A27]"
+              role="note"
+            >
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-[3px] h-5 w-5 shrink-0 text-[#98722B]"
+                strokeWidth={2}
+              />
+              <p className="text-sm font-medium leading-6">
+                <span className="font-semibold">Pregnancy Caution:</span> avoid products containing{" "}
+                {pregnancyCautionIngredients.map((ingredient, index) => (
+                  <span key={ingredient}>
+                    {index > 0 && " or "}
+                    <strong className="font-semibold">{ingredient}</strong>
+                  </span>
+                ))}{" "}
+                and consult your obstetrician or dermatologist before selecting
+                skincare.
+              </p>
+            </div>
+          )}
         </section>
 
         <section id="products" className="mt-12">
@@ -155,22 +192,39 @@ function AnalysisResultContent({
               <Star className="h-5 w-5" strokeWidth={1.7} />
             </span>
             <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
-              Top 5 Product Recommendations
+              {mainCategory === "All"
+                ? "Recommended Routine"
+                : "Top 5 Product Recommendations"}
             </h2>
           </div>
           <ProductCategoryFilter
-            options={availableFilters}
-            value={category}
-            onChange={setCategory}
+            filters={productCategoryFilters}
+            mainValue={mainCategory}
+            subValue={subCategory}
+            onMainChange={selectMainCategory}
+            onSubChange={setSubCategory}
           />
           <div className="mt-6">
-            <ProductRecommendationList products={filteredProducts} />
+            {isLoading ? (
+              <ProductLoadingState />
+            ) : error ? (
+              <ProductErrorState message={error} onRetry={retry} />
+            ) : (
+              <ProductRecommendationList products={products} />
+            )}
           </div>
         </section>
 
         {analysisResult.disclaimer && (
-          <section className="mt-12 rounded-[18px] border border-[#EAEAEA] bg-white p-5 text-sm leading-6 text-[#4F6466]">
-            {analysisResult.disclaimer}
+          <section className="mt-12 grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-[18px] border border-[#D7E5E3] bg-white p-5 text-[#354D51]">
+            <Info
+              aria-hidden="true"
+              className="h-5 w-5 text-[#0B7A75]"
+              strokeWidth={2}
+            />
+            <p className="text-base font-semibold leading-7">
+              {analysisResult.disclaimer}
+            </p>
           </section>
         )}
 
@@ -189,6 +243,38 @@ function AnalysisResultContent({
           </p>
         </footer>
     </>
+  );
+}
+
+function ProductLoadingState() {
+  return (
+    <div aria-label="Loading product recommendations" className="grid gap-4">
+      {[1, 2].map((row) => (
+        <div
+          key={row}
+          className="h-[164px] animate-pulse rounded-[16px] border border-[#EAEAEA] bg-white p-4"
+        >
+          <div className="h-full w-full rounded-[12px] bg-[#F4F6F7]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProductErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="rounded-[16px] border border-[#EAEAEA] bg-white p-5">
+      <p className="text-sm text-[#4F6466]">{message}</p>
+      <Button className="mt-4" size="sm" variant="outline" onClick={onRetry}>
+        Try again
+      </Button>
+    </div>
   );
 }
 

@@ -21,11 +21,6 @@ export default function Home() {
       <PrivacySection />
       <CTASection />
       <Footer
-        logo={
-          <span className="grid h-8 w-8 place-items-center rounded-[6px] border border-[#EAEAEA] bg-white text-sm font-semibold text-[#111111]">
-            Dz
-          </span>
-        }
         brandName="Dermalyzer"
         socialLinks={[
           {
@@ -40,18 +35,17 @@ export default function Home() {
           },
         ]}
         mainLinks={[
-          { href: "#products", label: "Products" },
-          { href: "#how-it-works", label: "How it Works" },
-          { href: "#science", label: "Science" },
-          { href: "#pricing", label: "Pricing" },
+          { href: "#products", label: "Produk" },
+          { href: "#how-it-works", label: "Cara Kerja" },
+          { href: "#science", label: "Dasar Ilmiah" },
         ]}
         legalLinks={[
-          { href: "#privacy", label: "Privacy" },
-          { href: "#terms", label: "Terms" },
+          { href: "#privacy", label: "Privasi" },
+          { href: "#terms", label: "Ketentuan" },
         ]}
         copyright={{
           text: "© 2026 Dermalyzer",
-          license: "All rights reserved",
+          license: "Hak cipta dilindungi",
         }}
       />
     </main>

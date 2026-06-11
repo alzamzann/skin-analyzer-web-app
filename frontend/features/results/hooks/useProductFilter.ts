@@ -41,7 +41,7 @@ export function useProductFilter(
         const message =
           requestError instanceof Error
             ? requestError.message
-            : "Product recommendations could not be loaded.";
+            : "Rekomendasi produk tidak dapat dimuat.";
         setFilteredProducts([]);
         setError(message);
       })

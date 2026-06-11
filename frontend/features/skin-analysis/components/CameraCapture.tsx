@@ -85,19 +85,21 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
-              Camera preview
+              Pratinjau kamera
             </p>
             <h2
               id="camera-preview-title"
               className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[var(--color-midnight-ink)]"
             >
-              {capturedUrl ? "Confirm this photo" : "Take a clear face photo"}
+              {capturedUrl
+                ? "Konfirmasi foto ini"
+                : "Ambil foto wajah yang jelas"}
             </h2>
           </div>
           <button
             type="button"
             className="grid h-10 w-10 place-items-center rounded-full text-[var(--color-slate-grille)] transition-colors hover:bg-[#EDF3EC] hover:text-[var(--color-midnight-ink)]"
-            aria-label="Close camera preview"
+            aria-label="Tutup pratinjau kamera"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
@@ -108,7 +110,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
           {capturedUrl ? (
             <Image
               src={capturedUrl}
-              alt="Captured camera preview"
+              alt="Pratinjau foto dari kamera"
               fill
               className="object-cover"
             />
@@ -131,7 +133,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
                   <div className="grid place-items-center gap-3 text-center text-white drop-shadow-[0_1px_8px_rgba(0,38,43,0.55)]">
                     <ScanFace className="h-14 w-14" strokeWidth={1.35} />
                     <span className="rounded-full bg-[rgba(0,38,43,0.42)] px-4 py-2 text-xs font-semibold tracking-[0.02em] backdrop-blur-sm">
-                      Center your face here
+                      Posisikan wajah di tengah
                     </span>
                   </div>
                 </div>
@@ -150,7 +152,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
             onClick={onClose}
           >
             <CameraOff className="h-4 w-4" />
-            Cancel
+            Batal
           </Button>
           {capturedUrl ? (
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
@@ -161,11 +163,11 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
                 onClick={handleRetake}
               >
                 <RotateCcw className="h-4 w-4" />
-                Retake
+                Ambil ulang
               </Button>
               <Button type="button" className="gap-2" onClick={handleConfirm}>
                 <Check className="h-4 w-4" />
-                Confirm photo
+                Konfirmasi foto
               </Button>
             </div>
           ) : (
@@ -176,7 +178,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
               onClick={handleCapture}
             >
               <Camera className="h-4 w-4" />
-              Capture photo
+              Ambil foto
             </Button>
           )}
         </div>

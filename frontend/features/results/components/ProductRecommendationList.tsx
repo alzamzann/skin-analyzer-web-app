@@ -11,7 +11,7 @@ export function ProductRecommendationList({
   if (products.length === 0) {
     return (
       <div className="rounded-[16px] border border-[#EAEAEA] bg-white p-5 text-sm text-[#4F6466]">
-        No products match this filter yet.
+        Belum ada produk yang sesuai dengan filter ini.
       </div>
     );
   }

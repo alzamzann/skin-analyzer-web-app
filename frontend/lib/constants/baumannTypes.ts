@@ -50,3 +50,18 @@ export const baumannMappingRules = [
 ] as const;
 
 export const baumannTypeExamples = ["OSPW", "DRNT", "ORPW", "DSNT"] as const;
+
+const baumannLabelTranslations: Record<string, string> = {
+  Oily: "Berminyak",
+  Dry: "Kering",
+  Sensitive: "Sensitif",
+  Resistant: "Resisten",
+  Pigmented: "Berpigmen",
+  "Non-pigmented": "Tidak berpigmen",
+  "Wrinkle-prone": "Rentan keriput",
+  Tight: "Kencang",
+};
+
+export function translateBaumannLabel(label: string) {
+  return baumannLabelTranslations[label] ?? label;
+}

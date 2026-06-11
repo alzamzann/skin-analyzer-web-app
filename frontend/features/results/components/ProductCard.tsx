@@ -38,12 +38,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="mt-1 text-sm text-[#4F6466]">{product.brand}</p>
         {typeof product.similarityScore === "number" && (
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#4F6466]">
-            Match {Math.round(product.similarityScore * 100)}%
+            Kecocokan {Math.round(product.similarityScore * 100)}%
           </p>
         )}
         {product.matchedIngredients && product.matchedIngredients.length > 0 && (
           <p className="mt-2 text-xs leading-5 text-[#4F6466]">
-            Matched: {product.matchedIngredients.join(", ")}
+            Bahan yang cocok: {product.matchedIngredients.join(", ")}
           </p>
         )}
         {product.productUrl && (
@@ -53,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
             rel="noreferrer"
             target="_blank"
           >
-            View product
+            Lihat produk
           </a>
         )}
       </div>

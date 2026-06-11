@@ -11,7 +11,12 @@ export function RoiPreview({ roiImageUrl }: RoiPreviewProps) {
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl border border-[var(--color-platinum-border)]">
-      <Image src={roiImageUrl} alt="Skin region preview" fill className="object-cover" />
+      <Image
+        src={roiImageUrl}
+        alt="Pratinjau area kulit"
+        fill
+        className="object-cover"
+      />
     </div>
   );
 }

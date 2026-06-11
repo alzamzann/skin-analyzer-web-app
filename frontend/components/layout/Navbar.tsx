@@ -6,11 +6,10 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
 const defaultNavItems = [
-  { label: "Products", href: "#products" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Science", href: "#science" },
-  { label: "Privacy", href: "#privacy" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Produk", href: "#products" },
+  { label: "Cara Kerja", href: "#how-it-works" },
+  { label: "Dasar Ilmiah", href: "#science" },
+  { label: "Privasi", href: "#privacy" },
 ];
 
 interface NavbarItem {
@@ -28,7 +27,7 @@ interface NavbarProps {
 function BrandMark({ href = "#top" }: { href?: string }) {
   return (
     <motion.a
-      aria-label="Dermalyzer home"
+      aria-label="Beranda Dermalyzer"
       className="inline-flex items-center justify-self-start text-[#111111]"
       href={href}
       whileHover={{ opacity: 0.78, y: -1 }}
@@ -85,7 +84,7 @@ export function Navbar({
         <BrandMark href={brandHref} />
 
         <nav
-          aria-label="Primary navigation"
+          aria-label="Navigasi utama"
           className="hidden items-center justify-center gap-[clamp(0.65rem,1.1vw,1.25rem)] lg:flex"
         >
           {items.map((item) => (

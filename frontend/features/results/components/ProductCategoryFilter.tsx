@@ -40,7 +40,7 @@ export function ProductCategoryFilter({
   return (
     <div className="space-y-4">
       <FilterRow
-        ariaLabel="Filter by main product category"
+        ariaLabel="Filter berdasarkan kategori utama produk"
         options={mainOptions}
         value={mainValue}
         onChange={onMainChange}
@@ -51,12 +51,12 @@ export function ProductCategoryFilter({
             className="text-xs font-semibold uppercase tracking-[0.12em] text-[#4F6466]"
             htmlFor="product-subcategory-filter"
           >
-            {mainValue} type
+            Jenis {mainValue}
           </label>
           <Select value={subValue} onValueChange={onSubChange}>
             <SelectTrigger
               id="product-subcategory-filter"
-              aria-label={`Filter ${mainValue} by subcategory`}
+              aria-label={`Filter ${mainValue} berdasarkan subkategori`}
               className="max-w-xs"
             >
               <SelectValue placeholder={`All ${mainValue}`} />

@@ -29,17 +29,17 @@ export function ImageUploadCard({
         </div>
 
         <h2 className="text-2xl font-semibold tracking-[0.004px] text-[var(--color-midnight-ink)]">
-          Upload your photo
+          Unggah foto Anda
         </h2>
         <p className="mt-2 max-w-md text-sm leading-6 text-[var(--color-slate-grille)]">
-          Front-facing, well-lit photos work best for Baumann skin type
-          analysis.
+          Foto tampak depan dengan pencahayaan yang baik memberikan hasil
+          terbaik untuk analisis jenis kulit Baumann.
         </p>
 
         <div className="mt-7 flex w-full max-w-[320px] flex-col gap-4">
           <label className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--color-oceanic-deep)] px-7 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-midnight-ink)]">
             <Upload className="h-4 w-4" strokeWidth={2} />
-            <span>{fileName ? "Replace Photo" : "Upload Photo"}</span>
+            <span>{fileName ? "Ganti Foto" : "Unggah Foto"}</span>
             <Input
               className="sr-only"
               type="file"
@@ -52,7 +52,7 @@ export function ImageUploadCard({
 
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs text-[var(--color-stone-whisper)]">
             <span className="h-px bg-[var(--color-ash-cloud)]/70" />
-            <span>or</span>
+            <span>atau</span>
             <span className="h-px bg-[var(--color-ash-cloud)]/70" />
           </div>
 
@@ -63,7 +63,7 @@ export function ImageUploadCard({
             onClick={onOpenCamera}
           >
             <Camera className="h-4 w-4" strokeWidth={2} />
-            Use Camera
+            Gunakan Kamera
           </Button>
         </div>
 
@@ -78,7 +78,7 @@ export function ImageUploadCard({
 
         <p className="mt-7 flex items-center justify-center gap-2 text-xs text-[var(--color-slate-grille)]">
           <LockKeyhole className="h-3.5 w-3.5" />
-          Your photos are processed securely and never stored.
+          Foto Anda diproses dengan aman dan tidak pernah disimpan.
         </p>
       </div>
     </div>

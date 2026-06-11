@@ -1,7 +1,6 @@
 import type React from "react";
 
 interface FooterProps {
-  logo: React.ReactNode;
   brandName: string;
   socialLinks: Array<{
     icon: React.ReactNode;
@@ -23,7 +22,6 @@ interface FooterProps {
 }
 
 export function Footer({
-  logo,
   brandName,
   socialLinks,
   mainLinks,
@@ -39,7 +37,6 @@ export function Footer({
             className="flex items-center gap-x-2"
             aria-label={brandName}
           >
-            {logo}
             <span className="text-lg font-semibold tracking-[-0.02em] text-[#111111]">
               {brandName}
             </span>

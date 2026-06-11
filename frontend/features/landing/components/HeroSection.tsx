@@ -63,9 +63,9 @@ export function HeroSection() {
   return (
     <FloatingIconsHero
       id="products"
-      title="Dermalyzer reads visible skin signals"
-      subtitle="Upload one clear face photo to estimate a Baumann-style skin type, then review ingredient guidance and product matches from the current dataset."
-      ctaText="Start analysis"
+      title="Dermalyzer"
+      subtitle="Unggah satu foto wajah yang jelas untuk memperkirakan jenis kulit Baumann, lalu tinjau panduan bahan dan kecocokan produk dari dataset saat ini."
+      ctaText="Mulai analisis"
       ctaHref="/analyze"
       icons={clinicalSignalIcons}
     />

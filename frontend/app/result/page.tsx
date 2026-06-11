@@ -22,6 +22,19 @@ import type {
 
 const PREGNANCY_CAUTION_INGREDIENTS = new Set(["Retinol", "Hydroquinone"]);
 
+function getLocalizedBaumannDescription(
+  mapping: SkinAnalysisResult["baumannMapping"],
+) {
+  const labels = [
+    mapping.oiliness,
+    mapping.sensitivity,
+    mapping.pigmentation,
+    mapping.aging,
+  ];
+
+  return `Profil kulit Anda cenderung ${labels[0]}, ${labels[1]}, ${labels[2]}, dan ${labels[3]}. Gunakan hasil ini sebagai panduan untuk memilih bahan dan produk yang sesuai dengan kebutuhan kulit Anda.`;
+}
+
 export default function ResultPage() {
   const [hasLoadedAnalysis, setHasLoadedAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<SkinAnalysisResult | null>(
@@ -42,17 +55,17 @@ export default function ResultPage() {
           <Button asChild variant="outline" size="sm" className="gap-2">
             <Link href="/analyze">
               <ArrowLeft className="h-4 w-4" />
-              Analyze Again
+              Analisis Ulang
             </Link>
           </Button>
         }
         brandHref="/"
         className="bg-transparent"
         items={[
-          { label: "Home", href: "/" },
-          { label: "Analyze", href: "/analyze" },
-          { label: "Ingredients", href: "#ingredients" },
-          { label: "Products", href: "#products" },
+          { label: "Beranda", href: "/" },
+          { label: "Analisis", href: "/analyze" },
+          { label: "Bahan", href: "#ingredients" },
+          { label: "Produk", href: "#products" },
         ]}
       />
 
@@ -146,7 +159,9 @@ function AnalysisResultContent({
           <BaumannResultCard
             baumannType={analysisResult.baumannType}
             confidence={analysisResult.confidence}
-            description={analysisResult.description}
+            description={getLocalizedBaumannDescription(
+              analysisResult.baumannMapping,
+            )}
           />
           <SkinAttributeSummary attributes={resultAttributes} />
         </section>
@@ -157,7 +172,7 @@ function AnalysisResultContent({
               <Leaf className="h-5 w-5" strokeWidth={1.7} />
             </span>
             <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
-              Recommended Ingredients
+              Bahan yang Direkomendasikan
             </h2>
           </div>
           <IngredientList ingredients={resultIngredients} />
@@ -172,15 +187,16 @@ function AnalysisResultContent({
                 strokeWidth={2}
               />
               <p className="text-sm font-medium leading-6">
-                <span className="font-semibold">Pregnancy Caution:</span> avoid products containing{" "}
+                <span className="font-semibold">Peringatan Kehamilan:</span>{" "}
+                hindari produk yang mengandung{" "}
                 {pregnancyCautionIngredients.map((ingredient, index) => (
                   <span key={ingredient}>
-                    {index > 0 && " or "}
+                    {index > 0 && " atau "}
                     <strong className="font-semibold">{ingredient}</strong>
                   </span>
                 ))}{" "}
-                and consult your obstetrician or dermatologist before selecting
-                skincare.
+                dan konsultasikan dengan dokter kandungan atau dokter kulit
+                sebelum memilih produk perawatan kulit.
               </p>
             </div>
           )}
@@ -193,8 +209,8 @@ function AnalysisResultContent({
             </span>
             <h2 className="text-2xl font-semibold tracking-[-0.02em] text-[#0B1026]">
               {mainCategory === "All"
-                ? "Recommended Routine"
-                : "Top 5 Product Recommendations"}
+                ? "Rutinitas yang Direkomendasikan"
+                : "5 Rekomendasi Produk Teratas"}
             </h2>
           </div>
           <ProductCategoryFilter
@@ -223,7 +239,9 @@ function AnalysisResultContent({
               strokeWidth={2}
             />
             <p className="text-base font-semibold leading-7">
-              {analysisResult.disclaimer}
+              Hasil ini hanya untuk tujuan edukasi dan bukan diagnosis medis.
+              Konsultasikan dengan dokter kulit untuk mendapatkan evaluasi dan
+              saran medis profesional.
             </p>
           </section>
         )}
@@ -233,13 +251,13 @@ function AnalysisResultContent({
             Dermalyzer<span className="text-[#0B7A75]">*</span>
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-[#354D51]">
-            <Link href="/">Home</Link>
-            <Link href="/analyze">Analyze</Link>
-            <a href="#ingredients">Ingredients</a>
-            <a href="#products">Products</a>
+            <Link href="/">Beranda</Link>
+            <Link href="/analyze">Analisis</Link>
+            <a href="#ingredients">Bahan</a>
+            <a href="#products">Produk</a>
           </div>
           <p className="mt-5 text-sm text-[#4F6466]">
-            © 2026 Dermalyzer. Educational skin analysis only.
+            © 2026 Dermalyzer. Hanya untuk edukasi analisis kulit.
           </p>
         </footer>
     </>
@@ -248,7 +266,7 @@ function AnalysisResultContent({
 
 function ProductLoadingState() {
   return (
-    <div aria-label="Loading product recommendations" className="grid gap-4">
+    <div aria-label="Memuat rekomendasi produk" className="grid gap-4">
       {[1, 2].map((row) => (
         <div
           key={row}
@@ -272,7 +290,7 @@ function ProductErrorState({
     <div className="rounded-[16px] border border-[#EAEAEA] bg-white p-5">
       <p className="text-sm text-[#4F6466]">{message}</p>
       <Button className="mt-4" size="sm" variant="outline" onClick={onRetry}>
-        Try again
+        Coba lagi
       </Button>
     </div>
   );
@@ -283,10 +301,10 @@ function ResultLoadingState() {
     <section className="grid min-h-[58vh] place-items-center rounded-[24px] border border-[#EAEAEA] bg-white/95 p-8 text-center shadow-[0_24px_80px_rgba(0,38,43,0.08)]">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B7A75]">
-          Result
+          Hasil
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-[#0B1026]">
-          Loading analysis
+          Memuat hasil analisis
         </h1>
       </div>
     </section>
@@ -298,17 +316,17 @@ function NoAnalysisFound() {
     <section className="grid min-h-[58vh] place-items-center rounded-[24px] border border-[#EAEAEA] bg-white/95 p-8 text-center shadow-[0_24px_80px_rgba(0,38,43,0.08)]">
       <div className="max-w-md">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0B7A75]">
-          No analysis found
+          Hasil analisis tidak ditemukan
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.03em] text-[#0B1026]">
-          Start with a face photo.
+          Mulai dengan foto wajah.
         </h1>
         <p className="mt-4 text-base leading-7 text-[#4F6466]">
-          This page only shows results after an image has been analyzed in the
-          current browser session.
+          Halaman ini hanya menampilkan hasil setelah gambar dianalisis pada
+          sesi browser saat ini.
         </p>
         <Button asChild className="mt-8">
-          <Link href="/analyze">Go to analyzer</Link>
+          <Link href="/analyze">Buka halaman analisis</Link>
         </Button>
       </div>
     </section>

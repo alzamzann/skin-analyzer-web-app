@@ -5,6 +5,7 @@ from app.repositories.catalog_repository import CatalogRepository
 from app.services.analysis_service import AnalysisService
 from app.services.baumann_service import BaumannService
 from app.services.face_detection_service import MediaPipeFaceDetectionService
+from app.services.face_quality_service import FaceQualityValidationService
 from app.services.inference_service import TorchInferenceService
 from app.services.mock_inference_service import MockInferenceService
 from app.services.recommendation_service import RecommendationService
@@ -30,6 +31,7 @@ def get_roi_service() -> RoiService:
         face_detection_service=MediaPipeFaceDetectionService(
             settings.face_landmarker_model_path
         ),
+        face_quality_service=FaceQualityValidationService(),
         crop_size=settings.roi_crop_size,
     )
 

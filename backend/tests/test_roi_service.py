@@ -1,7 +1,7 @@
 from io import BytesIO
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from app.services.errors import AnalysisError
 from app.services.face_detection_service import (
@@ -21,10 +21,28 @@ ROI_CENTER_INDEXES = {
 }
 
 
-def _image_bytes() -> bytes:
+def _image_bytes(image: Image.Image | None = None) -> bytes:
     buffer = BytesIO()
-    Image.new("RGB", (128, 128), color=(180, 140, 120)).save(buffer, format="JPEG")
+    (image or _face_like_image()).save(buffer, format="JPEG")
     return buffer.getvalue()
+
+
+def _face_like_image() -> Image.Image:
+    image = Image.new("RGB", (128, 128), color=(226, 216, 204))
+    draw = ImageDraw.Draw(image)
+    draw.ellipse(
+        (24, 18, 104, 112),
+        fill=(184, 138, 116),
+        outline=(96, 70, 58),
+        width=2,
+    )
+    draw.ellipse((42, 48, 50, 55), fill=(38, 34, 34))
+    draw.ellipse((78, 48, 86, 55), fill=(38, 34, 34))
+    draw.line((64, 54, 59, 76, 68, 78), fill=(118, 84, 72), width=2)
+    draw.arc((48, 78, 82, 98), 20, 160, fill=(112, 68, 70), width=2)
+    for offset in range(0, 80, 8):
+        draw.line((28 + offset, 26, 34 + offset, 108), fill=(196, 150, 128), width=1)
+    return image
 
 
 def _landmarks() -> list[FaceLandmark]:
@@ -83,6 +101,14 @@ class NoFaceDetector:
         raise AnalysisError(
             "No face was detected. Upload a clear front-facing face photo.",
             "no_face_detected",
+        )
+
+
+class SmallFaceDetector:
+    def detect_single_face(self, _image: Image.Image) -> DetectedFace:
+        return DetectedFace(
+            bounding_box=FaceBoundingBox(x=58, y=56, width=12, height=14),
+            landmarks=_landmarks(),
         )
 
 
@@ -169,6 +195,30 @@ def test_roi_service_keeps_detector_errors() -> None:
         assert error.code == "no_face_detected"
     else:
         raise AssertionError("No-face images should fail before ROI extraction.")
+
+
+def test_roi_service_rejects_too_small_detected_face() -> None:
+    service = RoiService(face_detection_service=SmallFaceDetector(), crop_size=48)
+
+    try:
+        service.extract(_image_bytes())
+    except AnalysisError as error:
+        assert error.code == "face_quality_rejected"
+    else:
+        raise AssertionError("Tiny face detections should fail quality validation.")
+
+
+def test_roi_service_rejects_flat_detected_face_crop() -> None:
+    service = RoiService(face_detection_service=FakeDetector(), crop_size=48)
+
+    try:
+        service.extract(
+            _image_bytes(Image.new("RGB", (128, 128), color=(180, 140, 120)))
+        )
+    except AnalysisError as error:
+        assert error.code == "face_quality_rejected"
+    else:
+        raise AssertionError("Flat face crops should fail quality validation.")
 
 
 def test_mediapipe_detector_reports_missing_model() -> None:

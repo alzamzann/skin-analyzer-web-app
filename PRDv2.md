@@ -72,7 +72,21 @@ The system must not present results as a medical diagnosis. It should be positio
 - The system uses MediaPipe to detect a face in the uploaded image.
 - If no face is detected, the user receives a retry message.
 - If multiple faces are detected, the user is asked to upload a photo with only one face.
-- If the face is detected, the system proceeds to ROI extraction.
+- If exactly one face is detected, the system runs Level 1 face quality validation before ROI extraction.
+
+#### Level 1 Face Quality Validation
+The system applies a lightweight validation layer after MediaPipe detection and before ROI extraction.
+
+This validation rejects images that are unsuitable for analysis, including:
+- incomplete face landmarks
+- face bounding boxes that are too small, too large, or implausibly shaped
+- too many landmarks outside the image boundary
+- face crops that are too dark, too bright, too flat, or too blurry
+- ROI crops that are too flat or unclear for model inference
+
+If validation fails, the backend returns `face_quality_rejected` and asks the user to upload a clearer, centered, front-facing human face photo.
+
+This Level 1 validation is a face-quality and plausibility gate. It does not guarantee that the detected face is a real human face. Face-like dolls, masks, statues, cartoons, printed photos, or screen photos may still pass if MediaPipe detects landmarks and the image satisfies the quality heuristics. Strict human-only validation requires a separate human-vs-non-human or anti-spoofing model.
 
 #### ROI Extraction
 The system extracts four facial Regions of Interest:
@@ -337,8 +351,10 @@ flowchart TD
     E --> F{Face status}
     F -- No face --> G[Ask user to upload clearer face image]
     F -- Multiple faces --> H[Ask user to upload image with one face]
-    F -- Low confidence --> I[Ask user to retake image with better lighting]
-    F -- Valid --> J[Continue analysis]
+    F -- One face --> I[Run Level 1 face quality validation]
+    I --> J{Quality status}
+    J -- Rejected --> K[Ask user to upload clearer centered human face photo]
+    J -- Valid --> L[Continue analysis]
 ```
 
 ### Recommendation Flow
@@ -407,6 +423,7 @@ backend/
     services/
       image_validation_service.py
       face_detection_service.py
+      face_quality_service.py
       roi_service.py
       inference_service.py
       baumann_service.py
@@ -830,6 +847,7 @@ Allow users to submit images and validate face presence.
 - Implement image validation.
 - Integrate MediaPipe Face Landmarker with a local `face_landmarker.task` file.
 - Handle missing model, no-face, and multiple-face cases.
+- Add Level 1 face quality validation for landmark completeness, face geometry, lighting, detail, and ROI clarity.
 
 #### Deliverables
 - Working image upload flow.
@@ -840,17 +858,19 @@ Allow users to submit images and validate face presence.
 ### Phase 3: ROI Extraction
 
 #### Goals
-Extract forehead, nose, left cheek, and right cheek regions.
+Extract forehead, nose, left cheek, and right cheek regions only after face quality validation passes.
 
 #### Tasks
 - Calculate ROI coordinates from MediaPipe landmarks.
 - Crop ROI images.
 - Resize and normalize ROI images.
 - Add development-only debug previews for ROI crops.
+- Reject extracted ROI sets when all crops are too flat or unclear for inference.
 
 #### Deliverables
 - ROI extraction module.
 - Preprocessed ROI tensors for model inference.
+- Tested Level 1 face quality and ROI quality rejection behavior.
 
 ### Phase 4: ML Model Integration
 

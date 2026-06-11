@@ -10,6 +10,7 @@ from app.services.face_detection_service import (
     FaceBoundingBox,
     MediaPipeFaceDetectionService,
 )
+from app.services.face_quality_service import FaceQualityValidationService
 from app.services.image_service import decode_image, encode_jpeg
 
 
@@ -99,14 +100,19 @@ class RoiService:
     def __init__(
         self,
         face_detection_service: MediaPipeFaceDetectionService,
+        face_quality_service: FaceQualityValidationService | None = None,
         crop_size: int = 224,
     ):
         self.face_detection_service = face_detection_service
+        self.face_quality_service = (
+            face_quality_service or FaceQualityValidationService()
+        )
         self.crop_size = crop_size
 
     def extract(self, image_bytes: bytes) -> RoiExtractionResult:
         image = decode_image(image_bytes)
         face = self.face_detection_service.detect_single_face(image)
+        self.face_quality_service.validate_detected_face(image, face)
         rois: list[RoiCrop] = []
 
         for region in ROI_CENTER_CONFIG:
@@ -119,6 +125,7 @@ class RoiService:
                 )
             )
 
+        self.face_quality_service.validate_roi_images([roi.image for roi in rois])
         return RoiExtractionResult(
             face_bounding_box=face.bounding_box,
             landmark_count=len(face.landmarks),
@@ -128,6 +135,7 @@ class RoiService:
     def detect_landmarks(self, image_bytes: bytes) -> LandmarkDetectionResult:
         image = decode_image(image_bytes)
         face = self.face_detection_service.detect_single_face(image)
+        self.face_quality_service.validate_detected_face(image, face)
         return LandmarkDetectionResult(image=image, face=face)
 
     def crop_from_landmark(
@@ -138,6 +146,7 @@ class RoiService:
     ) -> LandmarkCropResult:
         image = decode_image(image_bytes)
         face = self.face_detection_service.detect_single_face(image)
+        self.face_quality_service.validate_detected_face(image, face)
 
         if landmark_index < 0 or landmark_index >= len(face.landmarks):
             raise AnalysisError(

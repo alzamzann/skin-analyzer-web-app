@@ -1,7 +1,8 @@
 from functools import lru_cache
 
 from app.core.config import get_settings
-from app.repositories.catalog_repository import CatalogRepository
+from app.database import create_database_engine, create_session_factory
+from app.repositories.database_catalog_repository import DatabaseCatalogRepository
 from app.services.analysis_service import AnalysisService
 from app.services.baumann_service import BaumannService
 from app.services.face_detection_service import MediaPipeFaceDetectionService
@@ -13,8 +14,18 @@ from app.services.roi_service import RoiService
 
 
 @lru_cache
-def get_catalog_repository() -> CatalogRepository:
-    repository = CatalogRepository(get_settings().data_dir)
+def get_database_engine():
+    return create_database_engine(get_settings().database_url)
+
+
+@lru_cache
+def get_session_factory():
+    return create_session_factory(get_database_engine())
+
+
+@lru_cache
+def get_catalog_repository() -> DatabaseCatalogRepository:
+    repository = DatabaseCatalogRepository(get_session_factory())
     repository.load()
     return repository
 

@@ -29,7 +29,8 @@ This PRD is revised based on the provided datasets:
 - The file currently has one unnamed trailing column that should be removed or ignored during data loading.
 
 #### `products.csv`
-- Product count and category values are read from the current CSV dataset.
+- The current import snapshot contains 1,905 product rows.
+- PostgreSQL is the runtime catalog store; this CSV remains the reproducible import and backup source.
 - Key columns:
   - `bpom_id`
   - `name`
@@ -173,12 +174,12 @@ For the current dataset, product filters should be:
 - Moisturizer: Face Oil, Face Cream And Lotion, Face Mist, Face Gel
 - Sunscreen: Sunscreen
 
-Unmapped future CSV categories should remain selectable under `Other`.
+Unmapped imported categories should remain selectable under `Other`.
 
 ### Non-Functional Requirements
 
 #### Performance
-- Dataset loading should be cached in the backend instead of reading CSV files on every request.
+- The PostgreSQL catalog should be loaded into the repository cache instead of querying or reading CSV files on every recommendation request.
 - The ML model should be loaded once at application startup.
 - Product recommendation should be calculated quickly for a dataset of at least several hundred products.
 
@@ -200,7 +201,8 @@ The system should handle:
 - Blurry image
 - Failed ROI extraction
 - Model inference failure
-- Missing or malformed CSV values
+- Database unavailable or catalog not imported
+- Missing or malformed CSV import values
 - Empty recommendation result
 
 ---
@@ -388,8 +390,9 @@ flowchart TD
 | Face Detection | MediaPipe |
 | Model Architecture | EfficientNet |
 | Recommendation Logic | Python INCI matching / compatible ingredient coverage |
-| MVP Dataset Storage | CSV files |
-| Future Dataset Storage | PostgreSQL |
+| Runtime Dataset Storage | PostgreSQL 16 |
+| ORM and Migrations | SQLAlchemy 2 and Alembic |
+| Import / Backup Source | CSV files |
 
 ### High-Level Architecture
 
@@ -404,7 +407,9 @@ flowchart LR
     MODEL --> MAP[Baumann Mapping Service]
     MAP --> ING[Ingredient Recommendation Service]
     ING --> PROD[Product Recommendation Service]
-    PROD --> CSV[(ingredients.csv and products.csv)]
+    PROD --> DB[(PostgreSQL catalog)]
+    CSV[(ingredients.csv and products.csv)] --> IMPORT[Transactional catalog import]
+    IMPORT --> DB
     API --> FE
     FE --> U
 ```
@@ -421,6 +426,7 @@ backend/
         ingredients.py
         products.py
     services/
+      catalog_import_service.py
       image_validation_service.py
       face_detection_service.py
       face_quality_service.py
@@ -429,6 +435,11 @@ backend/
       baumann_service.py
       ingredient_service.py
       product_recommendation_service.py
+    repositories/
+      catalog_repository.py
+      database_catalog_repository.py
+    models.py
+    database.py
     ml/
       model_loader.py
       transforms.py
@@ -669,30 +680,34 @@ def recommend_products(baumann_type, ingredients_df, products_df, category=None,
 - ML model must be developed using PyTorch.
 - Face detection and ROI extraction use MediaPipe.
 - Model architecture uses EfficientNet.
-- MVP dataset source uses CSV files.
-- Product category filters must be generated from the categories present in `products.csv`.
-- The backend should cache CSV data at startup.
+- PostgreSQL is required for runtime catalog access.
+- CSV files remain the versioned import and backup source.
+- Product category filters must be generated from the categories imported from `products.csv`.
+- The backend should cache ordered database catalog records after startup.
 - The backend should normalize ingredient names before matching.
 - The backend should match products using `INCI_NAME` values only and calculate compatible-ingredient coverage, not cosine similarity.
 - Product recommendation does not require complete coverage of all compatible ingredients.
 - Price values should be parsed carefully because the current dataset uses Indonesian-style formatting, for example `45.650,00`.
 - Product category naming should be standardized in the UI; the canonical display name for sun-protection products is `Sunscreen`.
 
-### CSV vs Database Decision
-For the MVP, use CSV because:
-- The current dataset is small enough: 73 ingredients and 187 products.
-- The data appears mostly static.
-- There is no stated admin dashboard requirement yet.
-- There is no stated user history requirement yet.
-- CSV keeps development faster while the ML and recommendation workflow is still being validated.
+### PostgreSQL Catalog Decision
+The application uses PostgreSQL because the catalog has grown to approximately 2,000 products and now requires structured category relationships, repeatable imports, indexed access, and migration-controlled schema changes.
 
-Move to PostgreSQL later when:
-- Product data grows significantly.
-- Products or ingredients need frequent updates.
-- Admin CRUD features are required.
-- User accounts or analysis history are added.
-- Analytics, click tracking, favorites, or feedback are added.
-- More advanced querying and indexing are needed.
+Compatibility requirements:
+- Existing API request and response contracts remain unchanged.
+- Existing Python INCI matching and compatible-ingredient coverage ranking remain unchanged.
+- Source row order is stored and used to preserve stable ordering when recommendation scores tie.
+- `bpom_id` remains nullable and non-unique because the source dataset contains missing and duplicate values.
+- Each product receives an internal database primary key while preserving the existing public API identifier.
+- The backend must fail startup clearly when PostgreSQL is unavailable or the catalog is empty.
+- The backend must not silently fall back to CSV.
+
+Catalog refresh workflow:
+1. Update the CSV snapshots.
+2. Run Alembic migrations.
+3. Run the explicit transactional catalog import.
+4. Run the CSV-versus-database parity audit.
+5. Restart the backend to refresh the cached catalog.
 
 ### Dataset Cleaning Constraints
 Before production use, clean or standardize:
@@ -826,6 +841,9 @@ Create the base frontend, backend, and dataset structure.
 - Initialize FastAPI backend.
 - Add `ingredients.csv` and `products.csv` to backend data folder.
 - Create CSV loader utility.
+- Add PostgreSQL, SQLAlchemy models, Alembic migrations, and Docker Compose.
+- Add a transactional CSV-to-PostgreSQL catalog importer.
+- Add CSV-versus-database recommendation parity checks.
 - Clean unnamed column from `ingredients.csv` or ignore it during loading.
 - Standardize category labels from `products.csv`.
 - Define TypeScript and Python response schemas.

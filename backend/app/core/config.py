@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     app_name: str = "Dermalyzer API"
     api_prefix: str = "/api"
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    database_url: str = (
+        "postgresql+psycopg://dermalyzer:dermalyzer@localhost:5432/dermalyzer"
+    )
     max_upload_size_bytes: int = 8 * 1024 * 1024
     data_dir: Path = Path(__file__).resolve().parents[1] / "data"
     face_landmarker_model_path: Path = (

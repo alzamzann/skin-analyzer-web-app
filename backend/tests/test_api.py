@@ -4,7 +4,6 @@ from io import BytesIO
 
 from PIL import Image
 
-from app.api.dependencies import get_recommendation_service
 from app.api.routes.analyze import analyze_skin
 from app.api.routes.analyze import preview_face_landmarks
 from app.api.routes.analyze import preview_landmark_crop
@@ -12,6 +11,7 @@ from app.api.routes.analyze import preview_roi_crops
 from app.api.routes.health import health_check
 from app.api.routes.recommendations import list_products
 from app.core.config import get_settings
+from app.repositories.catalog_repository import CatalogRepository
 from app.services.analysis_service import AnalysisService
 from app.services.baumann_service import BaumannService
 from app.services.face_detection_service import DetectedFace, FaceBoundingBox, FaceLandmark
@@ -90,9 +90,13 @@ def _analysis_service() -> AnalysisService:
     return AnalysisService(
         inference_service=MockInferenceService(),
         baumann_service=BaumannService(),
-        recommendation_service=get_recommendation_service(),
+        recommendation_service=_recommendation_service(),
         roi_service=FakeRoiService(),
     )
+
+
+def _recommendation_service() -> RecommendationService:
+    return RecommendationService(CatalogRepository(get_settings().data_dir))
 
 
 def test_health_check() -> None:
@@ -135,7 +139,7 @@ def test_products_can_be_filtered_by_main_category() -> None:
         sub_category=None,
         category=None,
         top_k=5,
-        recommendation_service=get_recommendation_service(),
+        recommendation_service=_recommendation_service(),
     )
 
     assert result.main_category == "Cleanser"

@@ -1,6 +1,6 @@
 # Backend Review Workflows
 
-This guide collects the local commands for reviewing the recommendation system and the current MediaPipe ROI debug tools.
+This guide collects the local commands for PostgreSQL catalog setup, recommendation review, and the current MediaPipe ROI debug tools.
 
 ## 1. Project Location
 
@@ -46,7 +46,76 @@ backend/app/ml_models/face_landmarker.task
 
 The `.task` file is ignored by git.
 
-## 3. Run Backend Tests
+## 3. PostgreSQL Catalog Setup
+
+Start PostgreSQL from the repository root:
+
+```bash
+docker compose up -d db
+docker compose ps
+```
+
+Create the backend environment file:
+
+```bash
+cd /home/alzamzann/skin-analyzer/skin-analyzer-web-app/backend
+cp .env.example .env
+```
+
+Apply schema migrations and import the CSV snapshots:
+
+```bash
+alembic upgrade head
+python scripts/import_catalog.py
+```
+
+Expected current import totals:
+
+```txt
+Ingredients imported: 73
+Products imported: 1905
+Main categories: 4
+Subcategories: 18
+```
+
+The import replaces all catalog tables inside one transaction. Missing and duplicate
+BPOM values are preserved, and source row order is stored for recommendation tie
+compatibility.
+
+Run the exact CSV-versus-database parity audit:
+
+```bash
+python scripts/compare_catalogs.py
+```
+
+After refreshing the catalog, restart the backend because catalog records are cached.
+The API requires PostgreSQL and does not automatically fall back to CSV.
+
+Create a database backup:
+
+```bash
+docker compose exec -T db pg_dump -U dermalyzer -d dermalyzer > dermalyzer_catalog.sql
+```
+
+Restore a backup into an existing empty database:
+
+```bash
+docker compose exec -T db psql -U dermalyzer -d dermalyzer < dermalyzer_catalog.sql
+```
+
+Stop PostgreSQL without deleting data:
+
+```bash
+docker compose stop db
+```
+
+Delete the local database volume only when a full reset is intended:
+
+```bash
+docker compose down -v
+```
+
+## 4. Run Backend Tests
 
 ```bash
 cd /home/alzamzann/skin-analyzer/skin-analyzer-web-app/backend
@@ -54,7 +123,7 @@ conda activate skin-backend
 python -m pytest
 ```
 
-## 4. Recommendation Review
+## 5. Recommendation Review
 
 The recommendation audit script prints:
 
@@ -104,8 +173,8 @@ Audit one subcategory:
 python scripts/audit_recommendations.py --type DSPT --main-category Treatment --sub-category "Face Serum" --top-k 10
 ```
 
-The script prints current main/subcategory filters after loading `products.csv`.
-Unmapped CSV category values are reported under `Other`.
+The script prints current main/subcategory filters after loading the PostgreSQL catalog.
+Unmapped imported category values are reported under `Other`.
 
 Important matching rule:
 
@@ -130,7 +199,7 @@ Top 1 Cleanser + Top 1 Treatment + Top 1 Moisturizer + Top 1 Sunscreen
 Selecting a main category or subcategory in the result page loads its Top 5
 products using the same coverage score.
 
-## 5. Run Backend API
+## 6. Run Backend API
 
 ```bash
 cd /home/alzamzann/skin-analyzer/skin-analyzer-web-app/backend
@@ -146,7 +215,7 @@ http://127.0.0.1:8000/docs
 
 Use the docs page for the easiest file upload flow.
 
-## 5.1 Real Model Inference
+## 6.1 Real Model Inference
 
 Put the skin model file in:
 
@@ -206,7 +275,7 @@ Wrinkles
 
 If `DERMALYZER_MOCK_INFERENCE_ENABLED=true`, the backend keeps using the deterministic mock inference service.
 
-## 6. ROI Preview
+## 7. ROI Preview
 
 Endpoint:
 
@@ -246,7 +315,7 @@ right_cheek center landmark 280
 
 The crop source region is sized relative to detected face width, clamped inside the image, then resized to `224x224` for backend inference.
 
-## 7. All Landmark Preview
+## 8. All Landmark Preview
 
 Endpoint:
 
@@ -284,7 +353,7 @@ To view the numbered landmark image:
 1. Copy `annotatedImageDataUrl`.
 2. Paste it into the browser address bar.
 
-## 8. Single Landmark Crop Preview
+## 9. Single Landmark Crop Preview
 
 Endpoint:
 
@@ -334,7 +403,7 @@ Useful landmarks for the current ROI centers:
 280 right cheek
 ```
 
-## 9. Direct Curl Examples
+## 10. Direct Curl Examples
 
 ROI preview:
 
@@ -357,7 +426,7 @@ curl -X POST "http://127.0.0.1:8000/api/analyze/landmark-crop-preview?landmark_i
   -F "image=@/path/to/face.jpg"
 ```
 
-## 10. Common Errors
+## 11. Common Errors
 
 `face_model_missing`
 

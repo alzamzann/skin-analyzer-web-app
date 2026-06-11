@@ -2,6 +2,7 @@
 *.md
 !PRDv2.md
 !REVIEW_WORKFLOWS.md
+!START_GUIDE.md
 
 # Node modules
 node_modules/

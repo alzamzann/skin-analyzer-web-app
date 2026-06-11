@@ -1,4 +1,4 @@
-from app.repositories.catalog_repository import CatalogRepository
+from app.repositories.contracts import CatalogRepositoryProtocol
 from app.schemas.analysis import (
     ProductCategoryFilter,
     RecommendedIngredient,
@@ -15,7 +15,7 @@ from app.services.text import normalize_text, split_codes, split_terms
 
 
 class RecommendationService:
-    def __init__(self, catalog_repository: CatalogRepository):
+    def __init__(self, catalog_repository: CatalogRepositoryProtocol):
         self.catalog_repository = catalog_repository
 
     def get_available_filters(self) -> list[str]:

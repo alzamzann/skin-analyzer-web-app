@@ -1,8 +1,5 @@
 # Ignore markdown
 *.md
-!PRDv2.md
-!REVIEW_WORKFLOWS.md
-!START_GUIDE.md
 
 # Node modules
 node_modules/
@@ -13,6 +10,7 @@ node_modules/
 # Build folders
 dist/
 build/
+docs/
 
 # Python
 __pycache__/

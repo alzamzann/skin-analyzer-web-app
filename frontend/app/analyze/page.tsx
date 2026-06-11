@@ -65,12 +65,8 @@ export default function AnalyzePage() {
     setPendingPreviewUrl(null);
   };
 
-  const confirmPendingFile = () => {
-    if (!pendingFile) {
-      return;
-    }
-
-    selectFile(pendingFile);
+  const confirmPendingFile = (croppedFile: File) => {
+    selectFile(croppedFile);
     closePendingPreview();
   };
 
@@ -216,6 +212,7 @@ export default function AnalyzePage() {
 
       {pendingFile && pendingPreviewUrl && (
         <ImageConfirmationDialog
+          key={pendingPreviewUrl}
           fileName={pendingFile.name}
           imageUrl={pendingPreviewUrl}
           onCancel={closePendingPreview}

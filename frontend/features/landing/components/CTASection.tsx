@@ -13,22 +13,23 @@ export function CTASection() {
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#787774]">
-                Skin analysis
+                Analisis kulit
               </p>
               <h2 className="mt-3 max-w-2xl text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-6xl">
-                Start with one clear photo.
+                Mulai dengan satu foto yang jelas.
               </h2>
               <p className="mt-4 max-w-[62ch] text-base leading-7 text-[#5f5e5b]">
-                The flow checks image quality, maps visible skin attributes to a
-                Baumann type, then explains ingredient and product matches.
+                Proses ini memeriksa kualitas gambar, memetakan atribut kulit
+                yang terlihat ke jenis Baumann, lalu menjelaskan kecocokan bahan
+                dan produk.
               </p>
               <div className="mt-6 flex max-w-[62ch] gap-3 rounded-[14px] bg-[#F7F6F3] p-4 ring-1 ring-black/[0.03]">
                 <div className="grid h-9 w-9 flex-none place-items-center rounded-[10px] bg-white text-[#2F3437] ring-1 ring-black/[0.05]">
                   <BadgeInfo className="h-5 w-5" strokeWidth={1.65} />
                 </div>
                 <p className="text-sm leading-6 text-[#5f5e5b]">
-                  Educational skincare guidance only. Dermalyzer is not a
-                  medical diagnosis tool.
+                  Hanya untuk panduan edukasi perawatan kulit. Dermalyzer bukan
+                  alat diagnosis medis.
                 </p>
               </div>
             </div>
@@ -38,10 +39,10 @@ export function CTASection() {
                 size="lg"
                 className="h-11 rounded-[6px] bg-[#111111] px-6 text-sm text-white transition-transform duration-200 hover:bg-[#333333] active:scale-[0.98]"
               >
-                <Link href="/analyze">Start analysis</Link>
+                <Link href="/analyze">Mulai analisis</Link>
               </Button>
               <p className="max-w-48 text-sm leading-6 text-[#787774] lg:text-right">
-                Use one evenly lit, front-facing photo.
+                Gunakan satu foto tampak depan dengan pencahayaan merata.
               </p>
             </div>
           </div>

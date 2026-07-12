@@ -24,7 +24,9 @@ export function useAnalyzeSkin() {
       return nextResult;
     } catch (caughtError) {
       const message =
-        caughtError instanceof Error ? caughtError.message : "Analysis failed.";
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Analisis gagal dilakukan.";
       setError(message);
       setStatus("error");
       return null;

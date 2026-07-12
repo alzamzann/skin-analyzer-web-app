@@ -1,16 +1,17 @@
 "use client";
 
 import type React from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 
 const defaultNavItems = [
-  { label: "Products", href: "#products" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Science", href: "#science" },
-  { label: "Privacy", href: "#privacy" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Produk", href: "#products" },
+  { label: "Cara Kerja", href: "#how-it-works" },
+  { label: "Dasar Ilmiah", href: "#science" },
+  { label: "Privasi", href: "#privacy" },
 ];
 
 interface NavbarItem {
@@ -28,7 +29,7 @@ interface NavbarProps {
 function BrandMark({ href = "#top" }: { href?: string }) {
   return (
     <motion.a
-      aria-label="Dermalyzer home"
+      aria-label="Beranda Dermalyzer"
       className="inline-flex items-center justify-self-start text-[#111111]"
       href={href}
       whileHover={{ opacity: 0.78, y: -1 }}
@@ -45,11 +46,12 @@ function BrandMark({ href = "#top" }: { href?: string }) {
   );
 }
 
-function NavLink({ item }: { item: NavbarItem }) {
+function NavLink({ item, onClick }: { item: NavbarItem; onClick?: () => void }) {
   return (
     <motion.a
       className="rounded-full px-3 py-2 text-[0.84rem] font-medium leading-none tracking-[0] text-[#2F3437] transition-[color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[#EDF3EC] hover:text-[#111111] focus-visible:bg-[#EDF3EC]"
       href={item.href}
+      onClick={onClick}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
@@ -65,6 +67,10 @@ export function Navbar({
   className,
   items = defaultNavItems,
 }: NavbarProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <motion.header
       className={cn(
@@ -75,27 +81,90 @@ export function Navbar({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 120, damping: 18 }}
     >
-      <motion.div
-        className="mx-auto grid min-h-[68px] w-full max-w-[1040px] grid-cols-1 items-center justify-items-center gap-4 rounded-full border border-[#EAEAEA] bg-white/95 px-5 py-3 backdrop-blur-sm sm:min-h-[74px] sm:px-6 lg:grid-cols-[minmax(140px,0.58fr)_auto_minmax(140px,0.58fr)] lg:px-8"
-        whileHover={{
-          y: -2,
-        }}
-        transition={{ type: "spring", stiffness: 180, damping: 22 }}
-      >
-        <BrandMark href={brandHref} />
-
-        <nav
-          aria-label="Primary navigation"
-          className="hidden items-center justify-center gap-[clamp(0.65rem,1.1vw,1.25rem)] lg:flex"
+      <div className="mx-auto w-full max-w-[1040px]">
+        <motion.div
+          className="grid min-h-[68px] grid-cols-[auto_1fr_auto] items-center justify-items-center gap-4 rounded-full border border-[#EAEAEA] bg-white/95 px-5 py-3 backdrop-blur-sm sm:min-h-[74px] sm:px-6 lg:grid-cols-[minmax(140px,0.58fr)_auto_minmax(140px,0.58fr)] lg:px-8"
+          whileHover={{ y: -2 }}
+          transition={{ type: "spring", stiffness: 180, damping: 22 }}
         >
-          {items.map((item) => (
-            <NavLink item={item} key={item.href} />
-          ))}
-        </nav>
-        <div className="hidden justify-self-end lg:block">
-          {action ?? <span aria-hidden="true" />}
-        </div>
-      </motion.div>
+          <BrandMark href={brandHref} />
+
+          <nav
+            aria-label="Navigasi utama"
+            className="hidden items-center justify-center gap-[clamp(0.65rem,1.1vw,1.25rem)] lg:flex"
+          >
+            {items.map((item) => (
+              <NavLink item={item} key={item.href} />
+            ))}
+          </nav>
+
+          <div className="hidden justify-self-end lg:block">
+            {action ?? <span aria-hidden="true" />}
+          </div>
+
+          <button
+            type="button"
+            className="grid h-10 w-10 place-items-center justify-self-end rounded-full text-[#2F3437] transition-colors hover:bg-[#EDF3EC] lg:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {mobileMenuOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <X className="h-5 w-5" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="menu"
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Menu className="h-5 w-5" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </motion.div>
+
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden lg:hidden"
+            >
+              <div className="mt-2 flex flex-col gap-1 rounded-[20px] border border-[#EAEAEA] bg-white/95 px-4 py-4 backdrop-blur-sm">
+                {items.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMobileMenu}
+                    className="rounded-full px-4 py-3 text-sm font-medium text-[#2F3437] transition-colors hover:bg-[#EDF3EC] hover:text-[#111111]"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+                {action && (
+                  <div className="mt-2 border-t border-[#EAEAEA] pt-3">
+                    {action}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.header>
   );
 }

@@ -1,7 +1,5 @@
 # Ignore markdown
 *.md
-!PRDv2.md
-!REVIEW_WORKFLOWS.md
 
 # Node modules
 node_modules/
@@ -12,16 +10,27 @@ node_modules/
 # Build folders
 dist/
 build/
+docs/
 
 # Python
 __pycache__/
 .pytest_cache/
 *.py[cod]
+.venv/
 backend/app/ml_models/*.task
 backend/app/ml_models/*.pt
 backend/app/ml_models/*.pth
 backend/app/ml_models/*.onnx
 backend/app/ml_models/*.ckpt
+
+# Data files
+*.csv
+
+# Design references
+frontend/reference/
+
+# PowerShell scripts
+*.ps1
 
 # Logs
 *.log
@@ -30,3 +39,5 @@ backend/app/ml_models/*.ckpt
 .DS_Store
 Thumbs.db
 *:Zone.Identifier
+
+scripts

@@ -26,10 +26,10 @@ import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
 import { saveAnalysisResult } from "@/features/results/utils/analysisResultStorage";
 
 const guidance = [
-  { icon: Focus, label: "Face front and centered" },
-  { icon: SunMedium, label: "Good, natural lighting" },
-  { icon: BadgeCheck, label: "No makeup or sunglasses" },
-  { icon: Smile, label: "Neutral expression" },
+  { icon: Focus, label: "Wajah menghadap depan dan berada di tengah" },
+  { icon: SunMedium, label: "Pencahayaan alami yang baik" },
+  { icon: BadgeCheck, label: "Tanpa riasan atau kacamata hitam" },
+  { icon: Smile, label: "Ekspresi netral" },
 ];
 
 export default function AnalyzePage() {
@@ -65,12 +65,8 @@ export default function AnalyzePage() {
     setPendingPreviewUrl(null);
   };
 
-  const confirmPendingFile = () => {
-    if (!pendingFile) {
-      return;
-    }
-
-    selectFile(pendingFile);
+  const confirmPendingFile = (croppedFile: File) => {
+    selectFile(croppedFile);
     closePendingPreview();
   };
 
@@ -93,17 +89,17 @@ export default function AnalyzePage() {
           <Button asChild variant="outline" size="sm" className="gap-2">
             <Link href="/">
               <ArrowLeft className="h-4 w-4" />
-              Back
+              Kembali
             </Link>
           </Button>
         }
         brandHref="/"
         className="bg-transparent"
         items={[
-          { label: "Home", href: "/" },
-          { label: "Upload", href: "#upload" },
-          { label: "Guidance", href: "#guidance" },
-          { label: "Privacy", href: "/#privacy" },
+          { label: "Beranda", href: "/" },
+          { label: "Unggah", href: "#upload" },
+          { label: "Panduan", href: "#guidance" },
+          { label: "Privasi", href: "/#privacy" },
         ]}
       />
 
@@ -111,20 +107,21 @@ export default function AnalyzePage() {
 
         <section className="mx-auto w-full max-w-5xl pb-8 pt-14 text-center sm:pt-16">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-deep-teal)]">
-            Skin analyzer
+            Analisis kulit
           </p>
           <h1 className="mt-4 text-5xl font-semibold leading-none tracking-[-0.04em] text-[var(--color-midnight-ink)] sm:text-6xl">
-            Upload one clear face photo.
+            Unggah satu foto wajah yang jelas.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[var(--color-slate-grille)] sm:text-lg">
-            Dermalyzer maps visible skin signals into a Baumann-style profile,
-            then prepares ingredient and product guidance for your routine.
+            Dermalyzer memetakan tanda-tanda kulit yang terlihat ke profil
+            Baumann, lalu menyiapkan panduan bahan dan produk untuk rutinitas
+            Anda.
           </p>
         </section>
 
         <section
           id="upload"
-          className="mx-auto grid w-full max-w-4xl gap-6 pb-6 lg:grid-cols-[1.08fr_0.92fr]"
+          className="mx-auto grid w-full max-w-4xl gap-6 overflow-hidden pb-6 lg:grid-cols-[1.08fr_0.92fr]"
         >
           <ImageUploadCard
             error={uploadError}
@@ -136,10 +133,10 @@ export default function AnalyzePage() {
           <aside className="space-y-4 rounded-[24px] border border-[var(--color-ash-cloud)] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,38,43,0.06)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
-                Preview
+                Pratinjau
               </p>
               <h2 className="mt-2 text-xl font-semibold tracking-[-0.01em]">
-                Confirmed analysis image
+                Gambar analisis yang dikonfirmasi
               </h2>
             </div>
             <ImagePreview imageUrl={previewUrl} />
@@ -150,21 +147,21 @@ export default function AnalyzePage() {
               onClick={handleAnalyze}
               className="h-12 w-full gap-2"
             >
-              {isAnalyzing ? "Analyzing..." : "Analyze image"}
+              {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
             </Button>
             {isAnalyzing && <AnalysisLoading />}
             {analysisError && <AnalysisError message={analysisError} />}
             {status === "success" && result && (
               <div className="rounded-[18px] border border-[var(--color-ash-cloud)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
-                Analysis finished. Your result is ready to review on the
-                results page once the final results flow is connected.
+                Analisis selesai. Hasil Anda siap ditinjau pada halaman hasil.
               </div>
             )}
             <div className="flex items-start gap-3 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm leading-6 text-[var(--color-slate-grille)]">
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-oceanic-deep)]" />
               <p>
-                Use a clear image where the full face is visible. Avoid heavy
-                shadows, filters, sunglasses, or side angles.
+                Gunakan gambar yang jelas dengan seluruh wajah terlihat.
+                Hindari bayangan pekat, filter, kacamata hitam, atau sudut
+                menyamping.
               </p>
             </div>
           </aside>
@@ -176,7 +173,7 @@ export default function AnalyzePage() {
         >
           <div className="flex items-center gap-3 border-b border-[var(--color-ash-cloud)]/60 p-5 text-[var(--color-oceanic-deep)] md:border-b-0 md:border-r">
             <Sparkles className="h-5 w-5" />
-            <span className="text-sm font-semibold">For best results</span>
+            <span className="text-sm font-semibold">Untuk hasil terbaik</span>
           </div>
           {guidance.map((item) => {
             const Icon = item.icon;
@@ -203,18 +200,19 @@ export default function AnalyzePage() {
             <span className="text-xl font-bold tracking-[-0.02em] text-[var(--color-oceanic-deep)]">
               Dermalyzer
             </span>
-            <Link href="/">Home</Link>
-            <a href="#upload">Upload</a>
-            <a href="#guidance">Guidance</a>
+            <Link href="/">Beranda</Link>
+            <a href="#upload">Unggah</a>
+            <a href="#guidance">Panduan</a>
           </div>
           <p className="mt-4 text-sm text-[var(--color-slate-grille)]">
-            © 2026 Dermalyzer. Educational skin analysis only.
+            © 2026 Dermalyzer. Hanya untuk edukasi analisis kulit.
           </p>
         </footer>
       </div>
 
       {pendingFile && pendingPreviewUrl && (
         <ImageConfirmationDialog
+          key={pendingPreviewUrl}
           fileName={pendingFile.name}
           imageUrl={pendingPreviewUrl}
           onCancel={closePendingPreview}

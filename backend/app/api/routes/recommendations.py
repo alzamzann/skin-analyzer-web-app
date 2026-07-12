@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.dependencies import get_recommendation_service
 from app.schemas.analysis import IngredientListResponse, ProductListResponse
@@ -27,17 +27,31 @@ def list_ingredients(
 def list_products(
     baumann_type: str = Query(..., alias="baumannType"),
     category: str | None = None,
+    main_category: str | None = Query(None, alias="mainCategory"),
+    sub_category: str | None = Query(None, alias="subCategory"),
     top_k: int = Query(5, ge=1, le=20, alias="topK"),
     recommendation_service: RecommendationService = Depends(get_recommendation_service),
 ) -> ProductListResponse:
-    products, total_candidates = recommendation_service.recommend_products(
-        baumann_type=baumann_type.upper(),
-        category=category,
-        top_k=top_k,
-    )
+    try:
+        products, total_candidates, total_ingredients = recommendation_service.recommend_products(
+            baumann_type=baumann_type.upper(),
+            category=category,
+            main_category=main_category,
+            sub_category=sub_category,
+            top_k=top_k,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=422,
+            detail={"message": str(error), "code": "invalid_product_category"},
+        ) from error
+
     return ProductListResponse(
         baumann_type=baumann_type.upper(),
+        total_ingredients=total_ingredients,
         category=category,
+        main_category=main_category,
+        sub_category=sub_category,
         total_candidates=total_candidates,
         top_k=top_k,
         products=products,

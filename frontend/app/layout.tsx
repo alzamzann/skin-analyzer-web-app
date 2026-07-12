@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Dermalyzer | AI Skin Type Analyzer",
+  title: "Dermalyzer | Analisis Jenis Kulit dengan AI",
   description:
-    "Dermalyzer analyzes a face photo into a Baumann skin type, ingredient guidance, and skincare product recommendations.",
+    "Dermalyzer menganalisis foto wajah untuk menentukan jenis kulit Baumann serta memberikan panduan bahan dan rekomendasi produk perawatan kulit.",
   openGraph: {
-    title: "Dermalyzer | AI Skin Type Analyzer",
+    title: "Dermalyzer | Analisis Jenis Kulit dengan AI",
     description:
-      "Turn a face photo into a Baumann-style skin profile and focused skincare routine guidance.",
+      "Ubah foto wajah menjadi profil kulit Baumann dan panduan rutinitas perawatan kulit yang terarah.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dermalyzer | AI Skin Type Analyzer",
+    title: "Dermalyzer | Analisis Jenis Kulit dengan AI",
     description:
-      "Turn a face photo into a Baumann-style skin profile and focused skincare routine guidance.",
+      "Ubah foto wajah menjadi profil kulit Baumann dan panduan rutinitas perawatan kulit yang terarah.",
   },
 };
 
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className="h-full antialiased"
       data-scroll-behavior="smooth"
     >

@@ -43,7 +43,7 @@ class AnalysisService:
             description,
         ) = self.baumann_service.map_predictions(predictions)
         ingredients = self.recommendation_service.recommend_ingredients(baumann_type)
-        products, _ = self.recommendation_service.recommend_products(baumann_type)
+        products = self.recommendation_service.recommend_routine_products(baumann_type)
 
         return AnalysisResult(
             analysis_id=str(uuid4()),
@@ -56,6 +56,7 @@ class AnalysisService:
             recommended_ingredients=ingredients,
             recommended_products=products,
             available_filters=self.recommendation_service.get_available_filters(),
+            product_category_filters=self.recommendation_service.get_product_category_filters(),
             disclaimer=DISCLAIMER,
         )
 

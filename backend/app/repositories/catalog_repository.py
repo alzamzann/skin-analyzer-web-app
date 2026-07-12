@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from app.schemas.domain import IngredientRecord, ProductRecord
+from app.services.product_categories import normalize_subcategory
 
 
 def _clean_cell(value: object) -> str | None:
@@ -26,17 +27,6 @@ def _parse_price(value: object) -> int:
         digits = digits[:-2]
 
     return int(digits or 0)
-
-
-def _normalize_category(value: str | None) -> str:
-    text = (value or "").strip().lower()
-    if text in {"sun care", "suncare", "sunscreen", "spf"}:
-        return "Sun Care"
-    if text == "moisturizer":
-        return "Moisturizer"
-    if text == "cleanser":
-        return "Cleanser"
-    return value or "Uncategorized"
 
 
 class CatalogRepository:
@@ -111,7 +101,7 @@ class CatalogRepository:
                     bpom_id=_clean_cell(row.get("bpom_id")) or f"product-{index + 1}",
                     name=name,
                     brand=_clean_cell(row.get("brand")) or "Unknown Brand",
-                    category=_normalize_category(_clean_cell(row.get("category"))),
+                    category=normalize_subcategory(_clean_cell(row.get("category"))),
                     description=_clean_cell(row.get("description")),
                     price=_parse_price(row.get("price")),
                     ingredients=_clean_cell(row.get("ingredients")) or "",
@@ -185,7 +175,7 @@ def _seed_products() -> list[ProductRecord]:
             bpom_id="SEED-001",
             name="Barrier Comfort Cleanser",
             brand="Dermalyzer Lab",
-            category="Cleanser",
+            category="Face Wash",
             description="Gentle cleanser with ceramides and niacinamide.",
             price=185000,
             ingredients="Water, Glycerin, Niacinamide, Ceramide NP, Centella Asiatica",
@@ -196,7 +186,7 @@ def _seed_products() -> list[ProductRecord]:
             bpom_id="SEED-002",
             name="Oil Balance Gel Moisturizer",
             brand="Dermalyzer Lab",
-            category="Moisturizer",
+            category="Face Gel",
             description="Lightweight moisturizer with niacinamide and centella.",
             price=215000,
             ingredients="Water, Niacinamide, Centella Asiatica Extract, Hyaluronic Acid",
@@ -207,7 +197,7 @@ def _seed_products() -> list[ProductRecord]:
             bpom_id="SEED-003",
             name="Tone Defense Sun Care SPF 50",
             brand="Dermalyzer Lab",
-            category="Sun Care",
+            category="Sunscreen",
             description="Daily sun care with tranexamic acid and barrier support.",
             price=199000,
             ingredients="Zinc Oxide, Tranexamic Acid, Niacinamide, Ceramide AP",

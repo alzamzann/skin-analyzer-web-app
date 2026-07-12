@@ -37,6 +37,19 @@ class BaumannMapping(CamelModel):
     aging: str
 
 
+class BaumannAxisDecision(CamelModel):
+    axis: str
+    source_labels: list[str]
+    score: float = Field(ge=0, le=1)
+    threshold: float = Field(ge=0, le=1)
+    code: str
+    result: str
+    positive_code: str
+    negative_code: str
+    positive_result: str
+    negative_result: str
+
+
 class RecommendedIngredient(CamelModel):
     name: str
     reason: str
@@ -56,12 +69,20 @@ class RecommendedProduct(CamelModel):
     name: str
     brand: str
     category: str
+    main_category: str
+    sub_category: str
     description: str | None = None
     price: int
     image_url: str | None = None
     product_url: str | None = None
     matched_ingredients: list[str] = Field(default_factory=list)
+    matched_count: int = 0
     similarity_score: float = Field(ge=0, le=1)
+
+
+class ProductCategoryFilter(CamelModel):
+    main_category: str
+    sub_categories: list[str]
 
 
 class AnalysisResult(CamelModel):
@@ -75,6 +96,7 @@ class AnalysisResult(CamelModel):
     recommended_ingredients: list[RecommendedIngredient]
     recommended_products: list[RecommendedProduct]
     available_filters: list[str]
+    product_category_filters: list[ProductCategoryFilter]
     disclaimer: str
 
 
@@ -128,6 +150,30 @@ class LandmarkCropPreviewResponse(CamelModel):
     crop_image_data_url: str
 
 
+class BaumannThresholdPreviewResponse(CamelModel):
+    threshold: float = Field(ge=0, le=1)
+    face: FaceMetadata
+    baumann_type: str
+    confidence: float = Field(ge=0, le=1)
+    description: str
+    attributes: SkinAttributes
+    baumann_mapping: BaumannMapping
+    detected_labels: list[LabelPrediction]
+    decisions: list[BaumannAxisDecision]
+
+
+class BaumannConditionPreviewResponse(CamelModel):
+    threshold: float = Field(ge=0, le=1)
+    rule: str
+    baumann_type: str
+    confidence: float = Field(ge=0, le=1)
+    description: str
+    attributes: SkinAttributes
+    baumann_mapping: BaumannMapping
+    detected_labels: list[LabelPrediction]
+    decisions: list[BaumannAxisDecision]
+
+
 class IngredientListResponse(CamelModel):
     baumann_type: str
     include_all: bool
@@ -136,7 +182,10 @@ class IngredientListResponse(CamelModel):
 
 class ProductListResponse(CamelModel):
     baumann_type: str
+    total_ingredients: int = 0
     category: str | None = None
+    main_category: str | None = None
+    sub_category: str | None = None
     total_candidates: int
     top_k: int
     products: list[RecommendedProduct]

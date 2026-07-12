@@ -2,6 +2,27 @@ export interface SkinAnalysisInput {
   image: File;
 }
 
+export interface ProductCategoryFilterOption {
+  mainCategory: string;
+  subCategories: string[];
+}
+
+export interface RecommendedProductResult {
+  id: string;
+  bpomId?: string | null;
+  name: string;
+  brand: string;
+  category: string;
+  mainCategory: string;
+  subCategory: string;
+  description?: string | null;
+  price: number;
+  imageUrl?: string | null;
+  productUrl?: string | null;
+  matchedIngredients: string[];
+  similarityScore: number;
+}
+
 export interface SkinAnalysisResult {
   analysisId: string;
   baumannType: string;
@@ -36,22 +57,21 @@ export interface SkinAnalysisResult {
     personalCareCategory?: string | null;
     topicalUse?: string | null;
   }[];
-  recommendedProducts: {
-    id: string;
-    bpomId?: string | null;
-    name: string;
-    brand: string;
-    category: string;
-    description?: string | null;
-    price: number;
-    imageUrl?: string | null;
-    productUrl?: string | null;
-    matchedIngredients: string[];
-    similarityScore: number;
-  }[];
+  recommendedProducts: RecommendedProductResult[];
   availableFilters: string[];
+  productCategoryFilters: ProductCategoryFilterOption[];
   disclaimer: string;
   roiImageUrl?: string;
+}
+
+export interface ProductListResult {
+  baumannType: string;
+  category?: string | null;
+  mainCategory?: string | null;
+  subCategory?: string | null;
+  totalCandidates: number;
+  topK: number;
+  products: RecommendedProductResult[];
 }
 
 export type AnalysisStatus = "idle" | "loading" | "success" | "error";

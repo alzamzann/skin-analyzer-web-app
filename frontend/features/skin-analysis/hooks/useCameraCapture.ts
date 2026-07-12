@@ -19,7 +19,7 @@ export function useCameraCapture() {
         videoRef.current.srcObject = mediaStream;
       }
     } catch {
-      setError("Camera permission was blocked or unavailable.");
+      setError("Izin kamera diblokir atau kamera tidak tersedia.");
     }
   }, []);
 
@@ -34,7 +34,7 @@ export function useCameraCapture() {
     const video = videoRef.current;
 
     if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
-      setError("Camera preview is not ready yet.");
+      setError("Pratinjau kamera belum siap.");
       return null;
     }
 
@@ -44,7 +44,7 @@ export function useCameraCapture() {
 
     const context = canvas.getContext("2d");
     if (!context) {
-      setError("Could not capture the camera image.");
+      setError("Gambar dari kamera tidak dapat diambil.");
       return null;
     }
 
@@ -54,7 +54,7 @@ export function useCameraCapture() {
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            setError("Could not capture the camera image.");
+            setError("Gambar dari kamera tidak dapat diambil.");
             resolve(null);
             return;
           }

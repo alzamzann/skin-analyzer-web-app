@@ -1,23 +1,83 @@
 from app.schemas.analysis import BaumannMapping, LabelPrediction, SkinAttributes
 
 
+BAUMANN_AXIS_SOURCE_LABELS = {
+    "oiliness": ("Blackheads", "Enlarged Pores"),
+    "sensitivity": ("Acne", "Redness"),
+    "pigmentation": ("Pigmentation",),
+    "wrinkle_tendency": ("Wrinkles",),
+}
+
+
+def max_score_for_labels(
+    predictions: list[LabelPrediction],
+    source_labels: tuple[str, ...],
+) -> float:
+    return max(
+        (
+            prediction.confidence
+            for prediction in predictions
+            if prediction.label in source_labels
+        ),
+        default=0,
+    )
+
+
+def any_detected_for_labels(
+    predictions: list[LabelPrediction],
+    source_labels: tuple[str, ...],
+) -> bool:
+    return any(
+        prediction.detected
+        for prediction in predictions
+        if prediction.label in source_labels
+    )
+
+
 class BaumannService:
     def map_predictions(
         self, predictions: list[LabelPrediction]
     ) -> tuple[str, SkinAttributes, BaumannMapping, float, str]:
-        scores = {prediction.label: prediction.confidence for prediction in predictions}
+        oiliness = max_score_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
+        )
+        sensitivity = max_score_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["sensitivity"],
+        )
+        pigmentation = max_score_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["pigmentation"],
+        )
+        wrinkle_tendency = max_score_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
+        )
 
-        oiliness = max(scores.get("Blackheads", 0), scores.get("Enlarged Pores", 0))
-        sensitivity = max(scores.get("Acne", 0), scores.get("Redness", 0))
-        pigmentation = scores.get("Pigmentation", 0)
-        wrinkle_tendency = scores.get("Wrinkles", 0)
+        oiliness_detected = any_detected_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
+        )
+        sensitivity_detected = any_detected_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["sensitivity"],
+        )
+        pigmentation_detected = any_detected_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["pigmentation"],
+        )
+        wrinkle_detected = any_detected_for_labels(
+            predictions,
+            BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
+        )
 
         code = "".join(
             [
-                "O" if oiliness >= 0.5 else "D",
-                "S" if sensitivity >= 0.5 else "R",
-                "P" if pigmentation >= 0.5 else "N",
-                "W" if wrinkle_tendency >= 0.5 else "T",
+                "O" if oiliness_detected else "D",
+                "S" if sensitivity_detected else "R",
+                "P" if pigmentation_detected else "N",
+                "W" if wrinkle_detected else "T",
             ]
         )
 

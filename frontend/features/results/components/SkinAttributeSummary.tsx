@@ -13,18 +13,6 @@ const attributeIcons = {
   Tight: Waves,
 };
 
-function getLevel(value: number) {
-  if (value >= 70) {
-    return "High";
-  }
-
-  if (value >= 45) {
-    return "Moderate";
-  }
-
-  return "Low";
-}
-
 export function SkinAttributeSummary({ attributes }: SkinAttributeSummaryProps) {
   return (
     <section className="grid content-center gap-7 p-8 lg:p-10">
@@ -45,7 +33,7 @@ export function SkinAttributeSummary({ attributes }: SkinAttributeSummaryProps) 
                     {attribute.label}
                   </span>
                   <span className="text-sm text-[#354D51]">
-                    {attribute.value}% · {getLevel(attribute.value)}
+                    {attribute.value}%
                   </span>
                 </div>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#EEF2F5]">

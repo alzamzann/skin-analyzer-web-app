@@ -4,25 +4,25 @@ import { MotionReveal } from "@/features/landing/components/MotionReveal";
 
 const axes = [
   {
-    label: "Dry vs oily",
+    label: "Kering vs berminyak",
     code: "D / O",
     description:
-      "Uses Blackheads or Enlarged Pores to decide whether the profile starts oily or dry.",
+      "Menggunakan Komedo atau Pori-pori Besar untuk menentukan apakah profil diawali dengan kulit berminyak atau kering.",
   },
   {
-    label: "Sensitive vs resistant",
+    label: "Sensitif vs resisten",
     code: "S / R",
-    description: "Uses Acne or Redness to route the skin type toward sensitivity.",
+    description: "Menggunakan Jerawat atau Kemerahan untuk menentukan kecenderungan sensitivitas kulit.",
   },
   {
-    label: "Pigmented vs non-pigmented",
+    label: "Berpigmen vs tidak berpigmen",
     code: "P / N",
-    description: "Uses Pigmentation to explain uneven-tone recommendation needs.",
+    description: "Menggunakan Pigmentasi untuk menentukan kebutuhan rekomendasi bagi warna kulit yang tidak merata.",
   },
   {
-    label: "Wrinkled vs tight",
+    label: "Rentan keriput vs kencang",
     code: "W / T",
-    description: "Uses Wrinkles to separate texture-focused care from firm-skin care.",
+    description: "Menggunakan Keriput untuk membedakan perawatan tekstur dan perawatan kekencangan kulit.",
   },
 ];
 
@@ -32,29 +32,29 @@ export function BaumannIntroSection() {
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <MotionReveal className="lg:pt-10">
           <Badge className="border-[#EAEAEA] bg-[#EDF3EC] text-[#346538]">
-            Baumann method
+            Metode Baumann
           </Badge>
           <h2 className="mt-6 max-w-2xl text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-6xl">
-            Baumann typing makes the model output easier to use.
+            Klasifikasi Baumann membuat hasil model lebih mudah digunakan.
           </h2>
           <p className="mt-6 max-w-[62ch] text-base leading-7 text-[#5f5e5b]">
-            The model predicts visible labels like Acne, Redness, Pigmentation,
-            Blackheads, Wrinkles, and Enlarged Pores. Dermalyzer maps those
-            signals into a four-letter Baumann type, then uses that code to find
-            ingredients and products from the current dataset.
+            Model memprediksi kondisi yang terlihat seperti Jerawat, Kemerahan,
+            Pigmentasi, Komedo, Keriput, dan Pori-pori Besar. Dermalyzer
+            memetakan sinyal tersebut menjadi kode Baumann empat huruf, lalu
+            menggunakannya untuk mencari bahan dan produk dari dataset saat ini.
           </p>
           <div className="mt-10 grid max-w-lg grid-cols-2 border-y border-[#EAEAEA] py-5 text-sm">
             <div>
               <div className="font-mono text-3xl font-semibold text-[#111111]">
                 16
               </div>
-              <p className="mt-1 text-[#787774]">possible profiles</p>
+              <p className="mt-1 text-[#787774]">profil yang mungkin</p>
             </div>
             <div className="border-l border-[#EAEAEA] pl-5">
               <div className="font-mono text-3xl font-semibold text-[#111111]">
                 4
               </div>
-              <p className="mt-1 text-[#787774]">decision axes</p>
+              <p className="mt-1 text-[#787774]">sumbu keputusan</p>
             </div>
           </div>
         </MotionReveal>
@@ -64,7 +64,7 @@ export function BaumannIntroSection() {
             <div className="grid border-b border-[#EAEAEA] lg:grid-cols-[1fr_auto]">
               <div className="p-6 sm:p-8">
                 <p className="text-sm font-medium text-[#787774]">
-                  Sample output
+                  Contoh hasil
                 </p>
                 <div className="mt-4 font-mono text-7xl font-semibold leading-none tracking-[-0.04em] text-[#111111] sm:text-8xl">
                   DSPT
@@ -72,8 +72,8 @@ export function BaumannIntroSection() {
               </div>
               <div className="flex items-end border-t border-[#EAEAEA] bg-[#F7F6F3] p-6 sm:p-8 lg:border-l lg:border-t-0">
                 <p className="max-w-56 text-sm leading-6 text-[#5f5e5b]">
-                  The letters are a routing system for product filters,
-                  ingredient priorities, and recommendation explanations.
+                  Huruf-huruf ini menjadi dasar untuk filter produk, prioritas
+                  bahan, dan penjelasan rekomendasi.
                 </p>
               </div>
             </div>

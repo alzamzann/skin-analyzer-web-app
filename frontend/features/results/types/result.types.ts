@@ -22,7 +22,9 @@ export interface ProductRecommendation {
   name: string;
   brand: string;
   category: string;
-  description?: string;
+  mainCategory?: string;
+  subCategory?: string;
+  description?: string | null;
   price: number;
   imageUrl?: string | null;
   productUrl?: string | null;

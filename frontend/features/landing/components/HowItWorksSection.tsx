@@ -66,37 +66,37 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
     {
       icon: <Camera className="h-5 w-5" strokeWidth={1.75} />,
       step: "1",
-      title: "Upload one face photo",
+      title: "Unggah satu foto wajah",
       description:
-        "Choose a clear front-facing image or use the camera capture flow.",
+        "Pilih foto wajah tampak depan yang jelas atau gunakan fitur kamera.",
       benefits: [
-        "JPG, PNG, and WebP validation",
-        "Single-face guidance",
-        "Optional camera capture",
+        "Validasi format JPG, PNG, dan WebP",
+        "Panduan untuk satu wajah",
+        "Pilihan pengambilan foto dengan kamera",
       ],
     },
     {
       icon: <ScanFace className="h-5 w-5" strokeWidth={1.75} />,
       step: "2",
-      title: "Map visible attributes",
+      title: "Petakan atribut yang terlihat",
       description:
-        "The backend detects face regions and maps model labels into a Baumann type.",
+        "Backend mendeteksi area wajah dan memetakan label model ke jenis kulit Baumann.",
       benefits: [
-        "Forehead, nose, and cheek ROIs",
-        "EfficientNet confidence scores",
-        "Acne, redness, pigmentation, blackheads, wrinkles, enlarged pores",
+        "ROI dahi, hidung, dan pipi",
+        "Skor keyakinan EfficientNet",
+        "Jerawat, kemerahan, pigmentasi, komedo, keriput, dan pori-pori besar",
       ],
     },
     {
       icon: <Sparkles className="h-5 w-5" strokeWidth={1.75} />,
       step: "3",
-      title: "Review recommendations",
+      title: "Tinjau rekomendasi",
       description:
-        "See ingredients and product matches ranked from the current dataset.",
+        "Lihat bahan dan kecocokan produk yang diperingkat dari dataset saat ini.",
       benefits: [
-        "Ingredient match explanations",
-        "Top 5 product recommendations",
-        "Cleanser, Moisturizer, Sun Care filters",
+        "Penjelasan kecocokan bahan",
+        "5 rekomendasi produk teratas",
+        "Filter produk berbasis katalog",
       ],
     },
   ];
@@ -116,14 +116,14 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
           transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#787774]">
-            Process
+            Proses
           </p>
           <h2 className="mt-4 text-4xl font-medium leading-[1.08] tracking-[-0.03em] text-[#111111] sm:text-6xl">
-            How it works
+            Cara kerja
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#5f5e5b]">
-            The flow turns a face image into a Baumann-style skin type,
-            ingredient guidance, and product recommendations.
+            Proses ini mengubah foto wajah menjadi jenis kulit Baumann,
+            panduan bahan, dan rekomendasi produk.
           </p>
         </motion.div>
 

@@ -8,21 +8,21 @@ import { EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 const privacyPoints = [
   {
     icon: ShieldCheck,
-    title: "Temporary image processing",
+    title: "Pemrosesan gambar sementara",
     description:
-      "Images are processed for the analysis request and should not be stored permanently in the MVP.",
+      "Gambar diproses untuk permintaan analisis dan tidak disimpan secara permanen pada versi MVP.",
   },
   {
     icon: EyeOff,
-    title: "No public profile",
+    title: "Tidak ada profil publik",
     description:
-      "Uploaded images are not shown publicly, not sold, and not used to create social or advertising profiles.",
+      "Gambar yang diunggah tidak ditampilkan kepada publik, tidak dijual, dan tidak digunakan untuk membuat profil sosial atau iklan.",
   },
   {
     icon: LockKeyhole,
-    title: "Clear data boundaries",
+    title: "Batas penggunaan data yang jelas",
     description:
-      "If image storage is introduced later, the product must ask for explicit consent before saving photos.",
+      "Jika penyimpanan gambar ditambahkan nanti, pengguna harus dimintai persetujuan secara jelas sebelum foto disimpan.",
   },
 ];
 
@@ -35,15 +35,15 @@ export function PrivacySection() {
         <div className="grid gap-8 border-y border-[#EAEAEA] py-10 md:grid-cols-[0.82fr_1.18fr] md:items-start lg:py-12">
           <MotionReveal>
             <Badge className="border-[#EAEAEA] bg-[#E1F3FE] text-[#1F6C9F]">
-              Privacy
+              Privasi
             </Badge>
             <h2 className="mt-5 max-w-xl text-4xl font-medium leading-[1.1] tracking-[-0.03em] text-[#111111] text-balance sm:text-5xl">
-              Clear boundaries before upload.
+              Batas yang jelas sebelum mengunggah.
             </h2>
             <p className="mt-5 max-w-[58ch] text-base leading-7 text-[#5f5e5b]">
-              Dermalyzer is designed around a narrow use case: analyze the
-              image, return the result, and keep storage expectations understandable
-              before the user uploads anything.
+              Dermalyzer dirancang untuk satu tujuan khusus: menganalisis
+              gambar, menampilkan hasil, dan menjelaskan ketentuan penyimpanan
+              sebelum pengguna mengunggah apa pun.
             </p>
           </MotionReveal>
 

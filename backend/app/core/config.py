@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,6 +32,7 @@ class Settings(BaseSettings):
         ]
     )
     skin_model_threshold: float = 0.7
+    skin_model_label_thresholds: dict[str, float] = Field(default_factory=dict)
     mock_inference_enabled: bool = True
     roi_crop_size: int = 224
 
@@ -40,6 +41,23 @@ class Settings(BaseSettings):
         env_prefix="DERMALYZER_",
         extra="ignore",
     )
+
+    @field_validator("skin_model_label_thresholds")
+    @classmethod
+    def validate_label_thresholds(
+        cls,
+        thresholds: dict[str, float],
+    ) -> dict[str, float]:
+        invalid_labels = [
+            label for label, threshold in thresholds.items() if threshold < 0 or threshold > 1
+        ]
+        if invalid_labels:
+            raise ValueError(
+                "skin_model_label_thresholds values must be between 0 and 1 "
+                f"for labels: {', '.join(invalid_labels)}"
+            )
+
+        return thresholds
 
 
 @lru_cache

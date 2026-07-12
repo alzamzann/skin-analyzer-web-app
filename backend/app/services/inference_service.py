@@ -16,6 +16,7 @@ class TorchInferenceService:
         model_path: Path,
         labels: list[str],
         threshold: float = 0.5,
+        label_thresholds: dict[str, float] | None = None,
         arch: str = "efficientnet_b0",
         image_size: int = 224,
         device: str | None = None,
@@ -23,6 +24,7 @@ class TorchInferenceService:
         self.model_path = model_path
         self.labels = labels
         self.threshold = threshold
+        self.label_thresholds = label_thresholds or {}
         self.arch = arch
         self.image_size = image_size
         self.device = device
@@ -55,16 +57,22 @@ class TorchInferenceService:
         with self._lock:
             with torch.no_grad():
                 logits = model(batch)
-                probabilities = torch.sigmoid(logits).mean(dim=0).detach().cpu()
+                probabilities = (
+                    torch.sigmoid(logits).max(dim=0).values.detach().cpu()
+                )
 
         return [
             LabelPrediction(
                 label=label,
-                detected=float(probabilities[index]) >= self.threshold,
+                detected=float(probabilities[index])
+                >= self._threshold_for_label(label),
                 confidence=round(float(probabilities[index]), 3),
             )
             for index, label in enumerate(self.labels)
         ]
+
+    def _threshold_for_label(self, label: str) -> float:
+        return self.label_thresholds.get(label, self.threshold)
 
     def _get_model(self):
         if self._model is not None:

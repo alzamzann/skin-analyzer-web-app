@@ -57,12 +57,15 @@ class RecommendationService:
         main_category: str | None = None,
         sub_category: str | None = None,
         top_k: int = 5,
-    ) -> tuple[list[RecommendedProduct], int]:
+    ) -> tuple[list[RecommendedProduct], int, int]:
         ingredient_records = [
             ingredient
             for ingredient in self.catalog_repository.ingredients
             if self._is_suitable(ingredient, baumann_type, include_all=True)
         ]
+
+        total_ingredients = len(ingredient_records)
+
         products = self._filter_products(
             category=category,
             main_category=main_category,
@@ -73,6 +76,7 @@ class RecommendationService:
             self._score_product(
                 product=product,
                 ingredient_records=ingredient_records,
+                total_ingredients=total_ingredients,
             )
             for product in products
         ]
@@ -84,7 +88,7 @@ class RecommendationService:
             ),
             reverse=True,
         )
-        return scored[:top_k], len(scored)
+        return scored[:top_k], len(scored), total_ingredients
 
     def recommend_routine_products(self, baumann_type: str) -> list[RecommendedProduct]:
         available_main_categories = {
@@ -97,7 +101,7 @@ class RecommendationService:
             if main_category not in available_main_categories:
                 continue
 
-            products, _ = self.recommend_products(
+            products, _, _ = self.recommend_products(
                 baumann_type=baumann_type,
                 main_category=main_category,
                 top_k=1,
@@ -213,6 +217,7 @@ class RecommendationService:
         self,
         product: ProductRecord,
         ingredient_records: list[IngredientRecord],
+        total_ingredients: int,
     ) -> RecommendedProduct:
         normalized_product_ingredients = normalize_text(product.ingredients)
         matched = []
@@ -223,7 +228,8 @@ class RecommendationService:
             ):
                 matched.append(ingredient.name)
 
-        score = round(len(matched) / max(len(ingredient_records), 1), 3)
+        matched_count = len(matched)
+        score = round(matched_count / max(total_ingredients, 1), 3)
 
         return RecommendedProduct(
             id=product.bpom_id or normalize_text(product.name).replace(" ", "-"),
@@ -238,6 +244,7 @@ class RecommendationService:
             image_url=product.image_url,
             product_url=product.product_url,
             matched_ingredients=matched,
+            matched_count=matched_count,
             similarity_score=score,
         )
 

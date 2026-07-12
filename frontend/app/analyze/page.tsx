@@ -121,7 +121,7 @@ export default function AnalyzePage() {
 
         <section
           id="upload"
-          className="mx-auto grid w-full max-w-4xl gap-6 pb-6 lg:grid-cols-[1.08fr_0.92fr]"
+          className="mx-auto grid w-full max-w-4xl gap-6 overflow-hidden pb-6 lg:grid-cols-[1.08fr_0.92fr]"
         >
           <ImageUploadCard
             error={uploadError}
@@ -147,7 +147,7 @@ export default function AnalyzePage() {
               onClick={handleAnalyze}
               className="h-12 w-full gap-2"
             >
-              {isAnalyzing ? "Menganalisis..." : "Analisis gambar"}
+              {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
             </Button>
             {isAnalyzing && <AnalysisLoading />}
             {analysisError && <AnalysisError message={analysisError} />}

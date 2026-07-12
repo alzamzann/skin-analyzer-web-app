@@ -158,7 +158,6 @@ function AnalysisResultContent({
         <section className="overflow-hidden rounded-[24px] border border-[#EAEAEA] bg-white/95 shadow-[0_24px_80px_rgba(0,38,43,0.08)] md:grid md:grid-cols-[1fr_1fr]">
           <BaumannResultCard
             baumannType={analysisResult.baumannType}
-            confidence={analysisResult.confidence}
             description={getLocalizedBaumannDescription(
               analysisResult.baumannMapping,
             )}
@@ -175,7 +174,11 @@ function AnalysisResultContent({
               Bahan yang Direkomendasikan
             </h2>
           </div>
-          <IngredientList ingredients={resultIngredients} />
+          <IngredientList
+            ingredients={[...resultIngredients].sort((a, b) =>
+              a.name.localeCompare(b.name, "id"),
+            )}
+          />
           {pregnancyCautionIngredients.length > 0 && (
             <div
               className="mt-6 flex items-start gap-3 rounded-[16px] border border-[#E9DAB7] bg-[#FFF9ED] p-4 text-[#594A27]"
@@ -230,6 +233,15 @@ function AnalysisResultContent({
             )}
           </div>
         </section>
+
+        <div className="mt-12 flex justify-center">
+          <Button asChild size="lg">
+            <Link href="/analyze" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Analisis Ulang
+            </Link>
+          </Button>
+        </div>
 
         {analysisResult.disclaimer && (
           <section className="mt-12 grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-[18px] border border-[#D7E5E3] bg-white p-5 text-[#354D51]">

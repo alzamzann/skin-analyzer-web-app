@@ -5,6 +5,8 @@ from io import BytesIO
 from PIL import Image
 
 from app.api.routes.analyze import analyze_skin
+from app.api.routes.analyze import preview_baumann_condition_threshold
+from app.api.routes.analyze import preview_baumann_threshold
 from app.api.routes.analyze import preview_face_landmarks
 from app.api.routes.analyze import preview_landmark_crop
 from app.api.routes.analyze import preview_roi_crops
@@ -23,6 +25,7 @@ from app.services.roi_service import (
     RoiCrop,
     RoiExtractionResult,
 )
+from app.schemas.analysis import LabelPrediction
 
 
 @dataclass
@@ -86,9 +89,30 @@ class FakeRoiService:
         )
 
 
+class FixedInferenceService:
+    def predict_rois(self, _roi_images: list[Image.Image]) -> list[LabelPrediction]:
+        return [
+            LabelPrediction(label="Acne", detected=True, confidence=0.62),
+            LabelPrediction(label="Redness", detected=False, confidence=0.22),
+            LabelPrediction(label="Pigmentation", detected=True, confidence=0.74),
+            LabelPrediction(label="Blackheads", detected=True, confidence=0.66),
+            LabelPrediction(label="Wrinkles", detected=False, confidence=0.41),
+            LabelPrediction(label="Enlarged Pores", detected=False, confidence=0.31),
+        ]
+
+
 def _analysis_service() -> AnalysisService:
     return AnalysisService(
         inference_service=MockInferenceService(),
+        baumann_service=BaumannService(),
+        recommendation_service=_recommendation_service(),
+        roi_service=FakeRoiService(),
+    )
+
+
+def _fixed_analysis_service() -> AnalysisService:
+    return AnalysisService(
+        inference_service=FixedInferenceService(),
         baumann_service=BaumannService(),
         recommendation_service=_recommendation_service(),
         roi_service=FakeRoiService(),
@@ -203,6 +227,75 @@ def test_landmark_crop_preview_returns_crop_from_selected_dot() -> None:
     assert result.source_bounding_box.width == 32
     assert result.crop_size == 224
     assert result.crop_image_data_url.startswith("data:image/jpeg;base64,")
+
+
+def test_baumann_threshold_preview_returns_mapping_decisions() -> None:
+    file = FakeUploadFile(content_type="image/jpeg", payload=_image_bytes())
+
+    result = asyncio.run(
+        preview_baumann_threshold(
+            image=file,
+            threshold=0.7,
+            settings=get_settings(),
+            analysis_service=_fixed_analysis_service(),
+        )
+    )
+
+    assert result.threshold == 0.7
+    assert result.baumann_type == "DRPT"
+    assert result.attributes.oiliness == 66
+    assert [prediction.detected for prediction in result.detected_labels] == [
+        False,
+        False,
+        True,
+        False,
+        False,
+        False,
+    ]
+    assert [decision.axis for decision in result.decisions] == [
+        "oiliness",
+        "sensitivity",
+        "pigmentation",
+        "aging",
+    ]
+    assert [decision.code for decision in result.decisions] == ["D", "R", "P", "T"]
+    assert result.decisions[0].source_labels == ["Blackheads", "Enlarged Pores"]
+    assert result.decisions[0].score == 0.66
+
+
+def test_baumann_condition_preview_checks_threshold_boundaries() -> None:
+    below = preview_baumann_condition_threshold(
+        oiliness=0.49,
+        sensitivity=0.49,
+        pigmentation=0.49,
+        wrinkle_tendency=0.49,
+        threshold=0.5,
+    )
+    at_threshold = preview_baumann_condition_threshold(
+        oiliness=0.5,
+        sensitivity=0.5,
+        pigmentation=0.5,
+        wrinkle_tendency=0.5,
+        threshold=0.5,
+    )
+    above = preview_baumann_condition_threshold(
+        oiliness=0.51,
+        sensitivity=0.51,
+        pigmentation=0.51,
+        wrinkle_tendency=0.51,
+        threshold=0.5,
+    )
+
+    assert below.baumann_type == "DRNT"
+    assert [decision.result for decision in below.decisions] == [
+        "Dry",
+        "Resistant",
+        "Non-pigmented",
+        "Tight/Firm",
+    ]
+    assert at_threshold.baumann_type == "OSPW"
+    assert above.baumann_type == "OSPW"
+    assert at_threshold.rule == "score >= threshold selects the positive Baumann side"
 
 
 def test_analyze_rejects_unsupported_file_type() -> None:

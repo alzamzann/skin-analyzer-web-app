@@ -19,7 +19,7 @@ export function ImageUploadCard({
   onOpenCamera,
 }: ImageUploadCardProps) {
   return (
-    <div className="rounded-[24px] border border-[var(--color-ash-cloud)] bg-white p-4 shadow-[0_24px_80px_rgba(0,38,43,0.08)] sm:p-7">
+    <div className="min-w-0 overflow-hidden rounded-[24px] border border-[var(--color-ash-cloud)] bg-white p-4 shadow-[0_24px_80px_rgba(0,38,43,0.08)] sm:p-7">
       <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[18px] border border-dashed border-[rgba(161,194,198,0.85)] bg-[linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] px-6 py-10 text-center">
         <div className="relative mb-5 grid h-28 w-28 place-items-center rounded-full bg-[var(--color-pale-mint)] text-[var(--color-oceanic-deep)]">
           <Camera className="h-12 w-12" strokeWidth={1.55} />
@@ -29,7 +29,7 @@ export function ImageUploadCard({
         </div>
 
         <h2 className="text-2xl font-semibold tracking-[0.004px] text-[var(--color-midnight-ink)]">
-          Unggah foto Anda
+          Unggah Foto Anda
         </h2>
         <p className="mt-2 max-w-md text-sm leading-6 text-[var(--color-slate-grille)]">
           Foto tampak depan dengan pencahayaan yang baik memberikan hasil

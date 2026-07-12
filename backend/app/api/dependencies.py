@@ -51,12 +51,16 @@ def get_roi_service() -> RoiService:
 def get_inference_service():
     settings = get_settings()
     if settings.mock_inference_enabled:
-        return MockInferenceService()
+        return MockInferenceService(
+            threshold=settings.skin_model_threshold,
+            label_thresholds=settings.skin_model_label_thresholds,
+        )
 
     return TorchInferenceService(
         model_path=settings.skin_model_path,
         labels=settings.skin_model_labels,
         threshold=settings.skin_model_threshold,
+        label_thresholds=settings.skin_model_label_thresholds,
         arch=settings.skin_model_arch,
         image_size=settings.roi_crop_size,
     )

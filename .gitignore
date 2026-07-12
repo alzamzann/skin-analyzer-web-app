@@ -39,3 +39,5 @@ frontend/reference/
 .DS_Store
 Thumbs.db
 *:Zone.Identifier
+
+scripts

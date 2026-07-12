@@ -33,7 +33,7 @@ def list_products(
     recommendation_service: RecommendationService = Depends(get_recommendation_service),
 ) -> ProductListResponse:
     try:
-        products, total_candidates = recommendation_service.recommend_products(
+        products, total_candidates, total_ingredients = recommendation_service.recommend_products(
             baumann_type=baumann_type.upper(),
             category=category,
             main_category=main_category,
@@ -48,6 +48,7 @@ def list_products(
 
     return ProductListResponse(
         baumann_type=baumann_type.upper(),
+        total_ingredients=total_ingredients,
         category=category,
         main_category=main_category,
         sub_category=sub_category,

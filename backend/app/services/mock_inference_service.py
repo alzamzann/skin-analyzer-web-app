@@ -19,6 +19,14 @@ LABELS = [
 
 
 class MockInferenceService:
+    def __init__(
+        self,
+        threshold: float = 0.5,
+        label_thresholds: dict[str, float] | None = None,
+    ):
+        self.threshold = threshold
+        self.label_thresholds = label_thresholds or {}
+
     def predict_rois(self, roi_images: Sequence[Image.Image]) -> list[LabelPrediction]:
         if not roi_images:
             raise AnalysisError(
@@ -26,16 +34,27 @@ class MockInferenceService:
                 "model_inference_failed",
             )
 
-        tile_size = roi_images[0].size[0]
-        canvas = Image.new("RGB", (tile_size * 2, tile_size * 2), color=(255, 255, 255))
-        for index, roi_image in enumerate(roi_images[:4]):
-            x = (index % 2) * tile_size
-            y = (index // 2) * tile_size
-            canvas.paste(roi_image.convert("RGB"), (x, y))
+        roi_predictions = [
+            self._predict_image(roi_image.convert("RGB")) for roi_image in roi_images
+        ]
+        max_scores = {
+            label: max(
+                prediction.confidence
+                for predictions in roi_predictions
+                for prediction in predictions
+                if prediction.label == label
+            )
+            for label in LABELS
+        }
 
-        buffer = BytesIO()
-        canvas.save(buffer, format="JPEG", quality=90)
-        return self.predict(buffer.getvalue())
+        return [
+            LabelPrediction(
+                label=label,
+                detected=max_scores[label] >= self._threshold_for_label(label),
+                confidence=max_scores[label],
+            )
+            for label in LABELS
+        ]
 
     def predict(self, image_bytes: bytes) -> list[LabelPrediction]:
         try:
@@ -46,6 +65,9 @@ class MockInferenceService:
                 "invalid_image",
             ) from error
 
+        return self._predict_image(image)
+
+    def _predict_image(self, image: Image.Image) -> list[LabelPrediction]:
         image.thumbnail((128, 128))
         pixels = np.asarray(image, dtype=np.float32) / 255.0
         brightness = float(pixels.mean())
@@ -66,11 +88,14 @@ class MockInferenceService:
         return [
             LabelPrediction(
                 label=label,
-                detected=_clamp(raw_scores[label]) >= 0.5,
+                detected=_clamp(raw_scores[label]) >= self._threshold_for_label(label),
                 confidence=_clamp(raw_scores[label]),
             )
             for label in LABELS
         ]
+
+    def _threshold_for_label(self, label: str) -> float:
+        return self.label_thresholds.get(label, self.threshold)
 
 
 def _clamp(value: float) -> float:

@@ -65,7 +65,7 @@ export function HeroSection() {
       id="products"
       title="Dermalyzer"
       subtitle="Unggah satu foto wajah yang jelas untuk memperkirakan jenis kulit Baumann, lalu tinjau panduan bahan dan kecocokan produk dari dataset saat ini."
-      ctaText="Mulai analisis"
+      ctaText="Mulai Analisis"
       ctaHref="/analyze"
       icons={clinicalSignalIcons}
     />

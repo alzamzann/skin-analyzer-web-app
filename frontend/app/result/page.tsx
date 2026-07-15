@@ -181,12 +181,12 @@ function AnalysisResultContent({
           />
           {pregnancyCautionIngredients.length > 0 && (
             <div
-              className="mt-6 flex items-start gap-3 rounded-[16px] border border-[#E9DAB7] bg-[#FFF9ED] p-4 text-[#594A27]"
+              className="mt-6 flex items-start gap-3 rounded-[16px] border border-[#FDE047] bg-[#FEF9C3] p-4 text-[#854D0E]"
               role="note"
             >
               <TriangleAlert
                 aria-hidden="true"
-                className="mt-[3px] h-5 w-5 shrink-0 text-[#98722B]"
+                className="mt-[3px] h-5 w-5 shrink-0 text-[#CA8A04]"
                 strokeWidth={2}
               />
               <p className="text-sm font-medium leading-6">
@@ -244,10 +244,10 @@ function AnalysisResultContent({
         </div>
 
         {analysisResult.disclaimer && (
-          <section className="mt-12 grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-[18px] border border-[#D7E5E3] bg-white p-5 text-[#354D51]">
+          <section className="mt-12 grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-[18px] border border-[#FECACA] bg-[#FEF2F2] p-5 text-[#991B1B]">
             <Info
               aria-hidden="true"
-              className="h-5 w-5 text-[#0B7A75]"
+              className="h-5 w-5 text-[#DC2626]"
               strokeWidth={2}
             />
             <p className="text-base font-semibold leading-7">

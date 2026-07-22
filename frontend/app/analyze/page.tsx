@@ -16,9 +16,7 @@ import {
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
-import { AnalysisError } from "@/features/skin-analysis/components/AnalysisError";
 import { CameraCapture } from "@/features/skin-analysis/components/CameraCapture";
-import { ImageConfirmationDialog } from "@/features/skin-analysis/components/ImageConfirmationDialog";
 import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
@@ -37,10 +35,8 @@ const guidance = [
 export default function AnalyzePage() {
   const router = useRouter();
 
-  // --- State: kontrol visibilitas kamera dan file pending ---
+  // --- State: kontrol visibilitas kamera ---
   const [showCamera, setShowCamera] = useState(false);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
 
   // --- State: validasi wajah ---
   const [isValidating, setIsValidating] = useState(false);
@@ -49,45 +45,20 @@ export default function AnalyzePage() {
   // --- Hooks: upload gambar ---
   const { error: uploadError, file, selectFile } = useImageUpload();
 
-  // --- Stage: simpan file sementara untuk crop dialog ---
-  const stageFileForPreview = (nextFile: File | null) => {
-    if (!nextFile) {
-      return;
-    }
+  // --- Handle: pilih file dari input/kamera, validasi, navigasi ke quiz ---
+  const handleFileSelect = async (selectedFile: File | null) => {
+    if (!selectedFile) return;
 
-    setPendingFile(nextFile);
-    setPendingPreviewUrl((currentUrl) => {
-      if (currentUrl) {
-        URL.revokeObjectURL(currentUrl);
-      }
-
-      return URL.createObjectURL(nextFile);
-    });
-  };
-
-  // --- Stage: bersihkan file sementara ---
-  const closePendingPreview = () => {
-    if (pendingPreviewUrl) {
-      URL.revokeObjectURL(pendingPreviewUrl);
-    }
-
-    setPendingFile(null);
-    setPendingPreviewUrl(null);
-  };
-
-  // --- Stage: konfirmasi crop, validasi wajah, navigasi ke quiz ---
-  const confirmPendingFile = async (croppedFile: File) => {
     setIsValidating(true);
     setValidationError(null);
 
     try {
       // 1. Validasi wajah via backend
-      await validateFaceImage(croppedFile);
+      await validateFaceImage(selectedFile);
 
       // 2. Jika pass, simpan gambar dan navigasi ke quiz
-      selectFile(croppedFile);
-      await savePendingImage(croppedFile);
-      closePendingPreview();
+      selectFile(selectedFile);
+      await savePendingImage(selectedFile);
       router.push("/quiz");
     } catch (error) {
       // 3. Jika gagal, tampilkan error
@@ -145,9 +116,9 @@ export default function AnalyzePage() {
         >
           {/* --- Upload card: input file + tombol kamera --- */}
           <ImageUploadCard
-            error={uploadError}
+            error={uploadError || validationError}
             fileName={file?.name}
-            onFileSelect={stageFileForPreview}
+            onFileSelect={handleFileSelect}
             onOpenCamera={() => setShowCamera(true)}
           />
 
@@ -172,13 +143,10 @@ export default function AnalyzePage() {
               </div>
             )}
 
-            {/* --- Error validasi: tampilkan jika validasi gagal --- */}
-            {validationError && <AnalysisError message={validationError} />}
-
-            {/* --- Info: instruksi setelah crop --- */}
+            {/* --- Info: instruksi setelah upload --- */}
             {file && !isValidating && !validationError && (
               <div className="rounded-[18px] border border-[var(--color-spring-leaf)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
-                Wajah terdeteksi! Klik &quot;Gunakan hasil crop&quot; untuk melanjutkan ke quiz.
+                Wajah terdeteksi! Memuat quiz...
               </div>
             )}
 
@@ -241,22 +209,10 @@ export default function AnalyzePage() {
         </footer>
       </div>
 
-      {/* --- Dialog: crop dialog jika ada file pending --- */}
-      {pendingFile && pendingPreviewUrl && (
-        <ImageConfirmationDialog
-          key={pendingPreviewUrl}
-          fileName={pendingFile.name}
-          imageUrl={pendingPreviewUrl}
-          onCancel={closePendingPreview}
-          onConfirm={confirmPendingFile}
-          onRepick={stageFileForPreview}
-        />
-      )}
-
       {/* --- Dialog: kamera modal jika showCamera aktif --- */}
       {showCamera && (
         <CameraCapture
-          onCapture={stageFileForPreview}
+          onCapture={handleFileSelect}
           onClose={() => setShowCamera(false)}
         />
       )}

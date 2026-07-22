@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   BadgeCheck,
   Focus,
-  LockKeyhole,
   Loader2,
   Smile,
   Sparkles,
@@ -17,7 +16,6 @@ import {
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { CameraCapture } from "@/features/skin-analysis/components/CameraCapture";
-import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
 import { validateFaceImage } from "@/features/skin-analysis/services/skinAnalysisApi";
@@ -109,10 +107,10 @@ export default function AnalyzePage() {
           </p>
         </section>
 
-        {/* --- Upload: kartu upload + pratinjau --- */}
+        {/* --- Upload: kartu upload --- */}
         <section
           id="upload"
-          className="mx-auto grid w-full max-w-4xl gap-6 overflow-hidden pb-6 lg:grid-cols-[1.08fr_0.92fr]"
+          className="mx-auto w-full max-w-xl pb-6"
         >
           {/* --- Upload card: input file + tombol kamera --- */}
           <ImageUploadCard
@@ -122,44 +120,13 @@ export default function AnalyzePage() {
             onOpenCamera={() => setShowCamera(true)}
           />
 
-          {/* --- Sidebar: pratinjau gambar + status validasi --- */}
-          <aside className="space-y-4 rounded-[24px] border border-[var(--color-ash-cloud)] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,38,43,0.06)]">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
-                Pratinjau
-              </p>
-              <h2 className="mt-2 text-xl font-semibold tracking-[-0.01em]">
-                Gambar analisis yang dikonfirmasi
-              </h2>
+          {/* --- Loading validasi: tampilkan saat validasi wajah --- */}
+          {isValidating && (
+            <div className="mt-4 flex items-center justify-center gap-2 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm text-[var(--color-slate-grille)]">
+              <Loader2 className="h-4 w-4 animate-spin text-[var(--color-oceanic-deep)]" />
+              Memvalidasi wajah...
             </div>
-            {/* --- Image preview: tampilkan gambar yang sudah dipilih --- */}
-            <ImagePreview imageUrl={file ? URL.createObjectURL(file) : null} />
-
-            {/* --- Loading validasi: tampilkan saat validasi wajah --- */}
-            {isValidating && (
-              <div className="flex items-center gap-2 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm text-[var(--color-slate-grille)]">
-                <Loader2 className="h-4 w-4 animate-spin text-[var(--color-oceanic-deep)]" />
-                Memvalidasi wajah...
-              </div>
-            )}
-
-            {/* --- Info: instruksi setelah upload --- */}
-            {file && !isValidating && !validationError && (
-              <div className="rounded-[18px] border border-[var(--color-spring-leaf)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
-                Wajah terdeteksi! Memuat quiz...
-              </div>
-            )}
-
-            {/* --- Tip: panduan penggunaan gambar --- */}
-            <div className="flex items-start gap-3 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm leading-6 text-[var(--color-slate-grille)]">
-              <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-oceanic-deep)]" />
-              <p>
-                Gunakan gambar yang jelas dengan seluruh wajah terlihat.
-                Hindari bayangan pekat, filter, kacamata hitam, atau sudut
-                menyamping.
-              </p>
-            </div>
-          </aside>
+          )}
         </section>
 
         {/* --- Guidance: tips foto untuk hasil terbaik --- */}

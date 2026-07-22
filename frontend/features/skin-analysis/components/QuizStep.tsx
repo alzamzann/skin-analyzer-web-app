@@ -27,9 +27,9 @@ export function QuizStep({ question, selectedValue, onSelect }: QuizStepProps) {
 
       {/* Opsi Jawaban */}
       <div className="space-y-3">
-        {question.options.map((option) => (
+        {question.options.map((option, index) => (
           <button
-            key={option.value}
+            key={index}
             type="button"
             onClick={() => onSelect(option.value)}
             className={`w-full rounded-full border px-5 py-3 text-left text-sm font-medium transition-all ${

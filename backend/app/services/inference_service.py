@@ -1,3 +1,4 @@
+# Import
 from collections.abc import Sequence
 from pathlib import Path
 from threading import Lock
@@ -10,6 +11,7 @@ from app.schemas.analysis import LabelPrediction
 from app.services.errors import AnalysisError
 
 
+# Kelas utama
 class TorchInferenceService:
     def __init__(
         self,
@@ -32,6 +34,7 @@ class TorchInferenceService:
         self._transform = None
         self._lock = Lock()
 
+    # Inferensi prediksi label dari batch gambar ROI
     def predict_rois(self, roi_images: Sequence[Image.Image]) -> list[LabelPrediction]:
         if not roi_images:
             raise AnalysisError(
@@ -39,6 +42,7 @@ class TorchInferenceService:
                 "model_inference_failed",
             )
 
+        # Import PyTorch
         try:
             import torch
         except ImportError as error:
@@ -48,19 +52,24 @@ class TorchInferenceService:
                 status_code=503,
             ) from error
 
+        # Ambil model dan transform
         model = self._get_model()
         transform = self._get_transform()
 
+        # Transform dan stack gambar menjadi batch tensor
         batch = torch.stack([transform(ensure_rgb(image)) for image in roi_images])
         batch = batch.to(self._get_device())
 
+        # Jalankan inferensi tanpa gradient
         with self._lock:
             with torch.no_grad():
                 logits = model(batch)
+                # Konversi logits ke probabilitas menggunakan sigmoid
                 probabilities = (
                     torch.sigmoid(logits).max(dim=0).values.detach().cpu()
                 )
 
+        # Buat prediksi per label dengan threshold
         return [
             LabelPrediction(
                 label=label,
@@ -71,13 +80,16 @@ class TorchInferenceService:
             for index, label in enumerate(self.labels)
         ]
 
+    # Threshold per label atau global
     def _threshold_for_label(self, label: str) -> float:
         return self.label_thresholds.get(label, self.threshold)
 
+    # Inisialisasi model dan transform
     def _get_model(self):
         if self._model is not None:
             return self._model
 
+        # Validasi arsitektur model
         if self.arch != "efficientnet_b0":
             raise AnalysisError(
                 f"Unsupported skin model architecture: {self.arch}.",
@@ -85,6 +97,7 @@ class TorchInferenceService:
                 status_code=503,
             )
 
+        # Muat model dari file
         try:
             self._model = load_efficientnet_b0_state_dict_model(
                 model_path=self.model_path,
@@ -124,6 +137,7 @@ class TorchInferenceService:
                 ) from error
         return self._transform
 
+    # Deteksi device CUDA atau CPU
     def _get_device(self) -> str:
         if self.device is not None:
             return self.device

@@ -24,7 +24,8 @@ export function IngredientList({ ingredients }: IngredientListProps) {
         const hasDetails =
           (ingredient.inciName &&
             ingredient.inciName !== ingredient.name) ||
-          ingredient.alternateName;
+          ingredient.alternateName ||
+          ingredient.personalCareCategory;
 
         return (
           <div key={ingredient.name} className="flex flex-col">
@@ -73,6 +74,14 @@ export function IngredientList({ ingredients }: IngredientListProps) {
                           Nama lain:
                         </span>{" "}
                         {ingredient.alternateName}
+                      </p>
+                    )}
+                    {ingredient.personalCareCategory && (
+                      <p className="mt-1 text-[#354D51]">
+                        <span className="font-medium text-[#0B1026]">
+                          Personal Care Category:
+                        </span>{" "}
+                        {ingredient.personalCareCategory}
                       </p>
                     )}
                   </div>

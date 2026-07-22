@@ -1,6 +1,8 @@
+# Impor: dependensi pemetaan Baumann
 from app.schemas.analysis import BaumannMapping, LabelPrediction, SkinAttributes
 
 
+# Konfigurasi pemetaan label prediksi ke dimensi Baumann
 BAUMANN_AXIS_SOURCE_LABELS = {
     "oiliness": ("Blackheads", "Enlarged Pores"),
     "sensitivity": ("Acne", "Redness"),
@@ -9,10 +11,12 @@ BAUMANN_AXIS_SOURCE_LABELS = {
 }
 
 
+# Hitung skor dari prediksi
 def max_score_for_labels(
     predictions: list[LabelPrediction],
     source_labels: tuple[str, ...],
 ) -> float:
+    # Ambil confidence tertinggi dari label yang sesuai
     return max(
         (
             prediction.confidence
@@ -27,6 +31,7 @@ def any_detected_for_labels(
     predictions: list[LabelPrediction],
     source_labels: tuple[str, ...],
 ) -> bool:
+    # Cek apakah ada label yang terdeteksi
     return any(
         prediction.detected
         for prediction in predictions
@@ -34,10 +39,13 @@ def any_detected_for_labels(
     )
 
 
+# Kelas utama
 class BaumannService:
+    # Pemetaan 4 dimensi, kode, atribut, dan deskripsi
     def map_predictions(
         self, predictions: list[LabelPrediction]
     ) -> tuple[str, SkinAttributes, BaumannMapping, float, str]:
+        # Hitung skor tertinggi per sumbu
         oiliness = max_score_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
@@ -55,6 +63,7 @@ class BaumannService:
             BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
         )
 
+        # Cek apakah ada label yang terdeteksi per sumbu
         oiliness_detected = any_detected_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
@@ -72,6 +81,7 @@ class BaumannService:
             BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
         )
 
+        # Susun kode Baumann 4 karakter (misal: DSPT, DRPW)
         code = "".join(
             [
                 "O" if oiliness_detected else "D",
@@ -81,18 +91,21 @@ class BaumannService:
             ]
         )
 
+        # Buat mapping deskriptif per dimensi
         mapping = BaumannMapping(
             oiliness="Oily" if code[0] == "O" else "Dry",
             sensitivity="Sensitive" if code[1] == "S" else "Resistant",
             pigmentation="Pigmented" if code[2] == "P" else "Non-pigmented",
             aging="Wrinkle-prone" if code[3] == "W" else "Tight/Firm",
         )
+        # Konversi skor ke persen
         attributes = SkinAttributes(
             oiliness=round(oiliness * 100),
             sensitivity=round(sensitivity * 100),
             pigmentation=round(pigmentation * 100),
             wrinkle_tendency=round(wrinkle_tendency * 100),
         )
+        # Hitung confidence berdasarkan deviasi dari threshold 0.5
         confidence = round(
             (
                 abs(oiliness - 0.5)
@@ -105,6 +118,7 @@ class BaumannService:
             3,
         )
 
+        # Buat deskripsi untuk user
         description = (
             f"Your skin profile appears {mapping.oiliness.lower()}, "
             f"{mapping.sensitivity.lower()}, {mapping.pigmentation.lower()}, "

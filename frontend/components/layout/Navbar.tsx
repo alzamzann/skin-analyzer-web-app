@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
@@ -26,7 +27,16 @@ interface NavbarProps {
   items?: NavbarItem[];
 }
 
-function BrandMark({ href = "#top" }: { href?: string }) {
+function navigate(href: string, router: ReturnType<typeof useRouter>) {
+  if (href.startsWith("#")) {
+    const el = document.querySelector(href);
+    el?.scrollIntoView({ behavior: "smooth" });
+  } else {
+    router.push(href);
+  }
+}
+
+function BrandMark({ href = "/" }: { href?: string }) {
   return (
     <motion.a
       aria-label="Beranda Dermalyzer"
@@ -47,11 +57,19 @@ function BrandMark({ href = "#top" }: { href?: string }) {
 }
 
 function NavLink({ item, onClick }: { item: NavbarItem; onClick?: () => void }) {
+  const router = useRouter();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClick?.();
+    navigate(item.href, router);
+  };
+
   return (
     <motion.a
       className="rounded-full px-3 py-2 text-[0.84rem] font-medium leading-none tracking-[0] text-[#2F3437] transition-[color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[#EDF3EC] hover:text-[#111111] focus-visible:bg-[#EDF3EC]"
       href={item.href}
-      onClick={onClick}
+      onClick={handleClick}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 420, damping: 28 }}
@@ -63,13 +81,20 @@ function NavLink({ item, onClick }: { item: NavbarItem; onClick?: () => void }) 
 
 export function Navbar({
   action,
-  brandHref = "#top",
+  brandHref = "/",
   className,
   items = defaultNavItems,
 }: NavbarProps) {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const handleDropdownLink = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    setTimeout(() => navigate(href, router), 300);
+  };
 
   return (
     <motion.header
@@ -142,14 +167,14 @@ export function Navbar({
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden lg:hidden"
+              className="relative z-50 lg:hidden"
             >
-              <div className="mt-2 flex flex-col gap-1 rounded-[20px] border border-[#EAEAEA] bg-white/95 px-4 py-4 backdrop-blur-sm">
+              <div className="mt-2 flex flex-col gap-1 rounded-[20px] border border-[#EAEAEA] bg-white px-4 py-4">
                 {items.map((item) => (
                   <a
                     key={item.href}
                     href={item.href}
-                    onClick={closeMobileMenu}
+                    onClick={(e) => handleDropdownLink(e, item.href)}
                     className="rounded-full px-4 py-3 text-sm font-medium text-[#2F3437] transition-colors hover:bg-[#EDF3EC] hover:text-[#111111]"
                   >
                     {item.label}

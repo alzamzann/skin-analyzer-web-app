@@ -26,17 +26,21 @@ from app.services.errors import AnalysisError
 from app.services.face_detection_service import FaceBoundingBox, FaceLandmark
 from app.services.upload_validation_service import read_validated_image
 
+# Router
 router = APIRouter(tags=["analysis"])
 
 
+# Endpoint: analisis kulit utama (full pipeline)
 @router.post("/analyze", response_model=AnalysisResult, response_model_by_alias=True)
 async def analyze_skin(
     image: UploadFile = File(...),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
-) -> AnalysisResult:
+    ) -> AnalysisResult:
     try:
+        # Validasi dan baca gambar dari upload
         image_bytes = await read_validated_image(image, settings)
+        # Jalankan pipeline analisis lengkap 
         return analysis_service.analyze(image_bytes)
     except AnalysisError as error:
         raise HTTPException(
@@ -45,6 +49,7 @@ async def analyze_skin(
         ) from error
 
 
+# Endpoint: preview potongan ROI (forehead, nose, cheeks)
 @router.post(
     "/analyze/roi-preview",
     response_model=RoiPreviewResponse,
@@ -54,9 +59,11 @@ async def preview_roi_crops(
     image: UploadFile = File(...),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
-) -> RoiPreviewResponse:
+    ) -> RoiPreviewResponse:
     try:
+        # Validasi dan baca gambar dari upload
         image_bytes = await read_validated_image(image, settings)
+        # Ekstrak ROI dari wajah yang terdeteksi
         roi_result = analysis_service.extract_roi_preview(image_bytes)
         return RoiPreviewResponse(
             face=FaceMetadata(
@@ -79,6 +86,7 @@ async def preview_roi_crops(
         ) from error
 
 
+# Endpoint: preview deteksi landmark wajah
 @router.post(
     "/analyze/landmarks-preview",
     response_model=LandmarkPreviewResponse,
@@ -88,9 +96,11 @@ async def preview_face_landmarks(
     image: UploadFile = File(...),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
-) -> LandmarkPreviewResponse:
+    ) -> LandmarkPreviewResponse:
     try:
+        # Validasi dan baca gambar dari upload
         image_bytes = await read_validated_image(image, settings)
+        # Deteksi wajah dan ambil 468 landmark
         landmark_result = analysis_service.extract_landmark_preview(image_bytes)
         return LandmarkPreviewResponse(
             image_width=landmark_result.image.width,
@@ -117,6 +127,7 @@ async def preview_face_landmarks(
         ) from error
 
 
+# Endpoint: preview crop dari landmark tertentu
 @router.post(
     "/analyze/landmark-crop-preview",
     response_model=LandmarkCropPreviewResponse,
@@ -128,9 +139,11 @@ async def preview_landmark_crop(
     crop_size: int = Query(224, ge=32, le=1024),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
-) -> LandmarkCropPreviewResponse:
+    ) -> LandmarkCropPreviewResponse:
     try:
+        # Validasi dan baca gambar dari upload
         image_bytes = await read_validated_image(image, settings)
+        # Crop gambar di sekitar landmark yang dipilih
         crop_result = analysis_service.crop_from_landmark(
             image_bytes=image_bytes,
             landmark_index=landmark_index,
@@ -161,6 +174,7 @@ async def preview_landmark_crop(
         ) from error
 
 
+# Endpoint: preview mapping Baumann dengan threshold kustom
 @router.post(
     "/analyze/baumann-threshold-preview",
     response_model=BaumannThresholdPreviewResponse,
@@ -171,10 +185,13 @@ async def preview_baumann_threshold(
     threshold: float = Query(0.5, ge=0, le=1),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
-) -> BaumannThresholdPreviewResponse:
+    ) -> BaumannThresholdPreviewResponse:
     try:
+        # --- Validasi dan baca gambar dari upload ---
         image_bytes = await read_validated_image(image, settings)
+        # --- Ekstrak ROI dari wajah yang terdeteksi ---
         roi_result = analysis_service.extract_roi_preview(image_bytes)
+        # --- Jalankan inference ML pada ROI ---
         raw_predictions = analysis_service.inference_service.predict_rois(
             [roi.image for roi in roi_result.rois]
         )
@@ -215,6 +232,7 @@ async def preview_baumann_threshold(
         ) from error
 
 
+# --- Endpoint: preview mapping Baumann dari skor manual ---
 @router.get(
     "/analyze/baumann-condition-preview",
     response_model=BaumannConditionPreviewResponse,
@@ -267,10 +285,12 @@ def preview_baumann_condition_threshold(
     )
 
 
+# --- Helper: konversi FaceBoundingBox ke schema BoundingBox ---
 def _to_schema_box(box: FaceBoundingBox) -> BoundingBox:
     return BoundingBox(x=box.x, y=box.y, width=box.width, height=box.height)
 
 
+# --- Helper: buat keputusan axis Baumann dari predictions ---
 def _to_baumann_axis_decisions(
     predictions: list[LabelPrediction],
     threshold: float,
@@ -349,6 +369,7 @@ def _to_baumann_axis_decisions(
     return decisions
 
 
+# --- Helper: konversi skor manual ke LabelPredictions ---
 def _condition_scores_to_predictions(
     acne: float,
     blackheads: float,
@@ -392,6 +413,7 @@ def _condition_scores_to_predictions(
     ]
 
 
+# --- Helper: keputusan axis dari skor manual ---
 def _to_condition_axis_decisions(
     acne: float,
     blackheads: float,
@@ -468,6 +490,7 @@ def _to_condition_axis_decisions(
     return decisions
 
 
+# --- Helper: konversi FaceLandmark ke schema LandmarkPoint ---
 def _to_schema_landmark(
     index: int,
     landmark: FaceLandmark,

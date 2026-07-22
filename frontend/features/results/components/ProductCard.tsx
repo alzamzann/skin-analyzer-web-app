@@ -1,7 +1,5 @@
 import Image from "next/image";
 
-import { Badge } from "@/components/ui/Badge";
-
 import type { ProductRecommendation } from "../types/result.types";
 
 interface ProductCardProps {
@@ -27,11 +25,20 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="min-w-0 px-1">
-        <Badge className="border-[#0B7A75]/20 bg-[#DDF1EF] px-3.5 py-1.5 text-[0.68rem] uppercase tracking-[0.08em] text-[#006A66]">
-          {product.mainCategory
-            ? `${product.mainCategory} / ${product.category}`
-            : product.category}
-        </Badge>
+        {product.mainCategory ? (
+          <div className="inline-flex flex-col gap-0.5 rounded-full border border-[#0B7A75]/20 bg-[#DDF1EF] px-3.5 py-1.5">
+            <span className="text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[#006A66]">
+              {product.mainCategory}
+            </span>
+            <span className="text-[0.68rem] font-medium text-[#006A66]/80">
+              {product.category}
+            </span>
+          </div>
+        ) : (
+          <span className="inline-flex rounded-full border border-[#0B7A75]/20 bg-[#DDF1EF] px-3.5 py-1.5 text-[0.68rem] font-medium text-[#006A66]">
+            {product.category}
+          </span>
+        )}
         <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-[#0B1026]">
           {product.name}
         </h3>

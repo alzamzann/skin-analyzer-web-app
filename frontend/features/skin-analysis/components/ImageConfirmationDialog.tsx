@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { createCroppedImageFile } from "@/features/skin-analysis/utils/cropImage";
 
+// --- Props: nama file, URL gambar, handler batal/konfirmasi/pilih ulang ---
 interface ImageConfirmationDialogProps {
   fileName: string;
   imageUrl: string;
@@ -24,6 +25,7 @@ interface ImageConfirmationDialogProps {
   onRepick: (file: File | null) => void;
 }
 
+// --- Komponen: modal crop gambar dengan react-easy-crop ---
 export function ImageConfirmationDialog({
   fileName,
   imageUrl,
@@ -31,12 +33,16 @@ export function ImageConfirmationDialog({
   onConfirm,
   onRepick,
 }: ImageConfirmationDialogProps) {
+  // --- State: posisi crop, zoom level, area crop dalam pixel ---
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  // --- State: error crop dan status proses ---
   const [cropError, setCropError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // --- Confirm: potong gambar sesuai area crop, kirim ke parent ---
   const handleConfirm = async () => {
     if (!croppedAreaPixels) {
       setCropError("Area crop belum siap. Coba geser atau perbesar gambar.");
@@ -72,6 +78,7 @@ export function ImageConfirmationDialog({
       aria-labelledby="image-preview-title"
     >
       <div className="my-auto w-full max-w-3xl rounded-[24px] border border-[#EAEAEA] bg-white p-5 shadow-[0_32px_90px_rgba(0,38,43,0.18)] sm:p-6">
+        {/* --- Header: judul dan tombol tutup --- */}
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
@@ -83,6 +90,7 @@ export function ImageConfirmationDialog({
             >
               Posisikan wajah di dalam lingkaran
             </h2>
+            {/* --- Info: nama file yang dipilih --- */}
             <p className="mt-1 max-w-lg truncate text-sm text-[var(--color-slate-grille)]">
               {fileName}
             </p>
@@ -97,6 +105,7 @@ export function ImageConfirmationDialog({
           </button>
         </div>
 
+        {/* --- Crop: komponen interaktif crop gambar bulat --- */}
         <div className="relative aspect-square overflow-hidden rounded-[18px] border border-[var(--color-ash-cloud)] bg-[#162A2D] sm:aspect-[4/3]">
           <Cropper
             image={imageUrl}
@@ -112,12 +121,14 @@ export function ImageConfirmationDialog({
               setCroppedAreaPixels(croppedPixels)
             }
           />
+          {/* --- Overlay: instruksi geser foto --- */}
           <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[rgba(0,38,43,0.72)] px-4 py-2 text-xs font-medium text-white backdrop-blur-sm">
             <Move className="h-3.5 w-3.5" />
             Geser foto untuk mengatur posisi wajah
           </div>
         </div>
 
+        {/* --- Zoom: slider untuk perbesar/perkecil gambar --- */}
         <div className="mt-5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <ZoomOut
             aria-hidden="true"
@@ -139,10 +150,12 @@ export function ImageConfirmationDialog({
           />
         </div>
 
+        {/* --- Error: tampilkan pesan error crop --- */}
         {cropError && (
           <p className="mt-4 text-sm font-medium text-destructive">{cropError}</p>
         )}
 
+        {/* --- Actions: tombol batal, pilih ulang, konfirmasi crop --- */}
         <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button
             type="button"
@@ -153,6 +166,7 @@ export function ImageConfirmationDialog({
             <X className="h-4 w-4" />
             Batal
           </Button>
+          {/* --- Tombol pilih ulang: input file tersembunyi --- */}
           <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-[var(--color-spring-leaf)] bg-white px-7 text-sm font-medium text-[var(--color-oceanic-deep)] transition-colors hover:bg-[var(--color-pale-mint)]">
             <RotateCcw className="h-4 w-4" />
             Pilih ulang
@@ -163,12 +177,14 @@ export function ImageConfirmationDialog({
               onChange={(event) => onRepick(event.target.files?.[0] ?? null)}
             />
           </label>
+          {/* --- Tombol konfirmasi: proses crop dan kirim hasil --- */}
           <Button type="button" disabled={isSaving} onClick={handleConfirm}>
             <Check className="h-4 w-4" />
             {isSaving ? "Memproses..." : "Gunakan hasil crop"}
           </Button>
         </div>
 
+        {/* --- Tip: panduan pastikan wajah terlihat --- */}
         <p className="mt-4 flex items-center gap-2 text-xs text-[var(--color-slate-grille)]">
           <ImagePlus className="h-3.5 w-3.5" />
           Pastikan seluruh wajah terlihat di dalam lingkaran, termasuk dahi,

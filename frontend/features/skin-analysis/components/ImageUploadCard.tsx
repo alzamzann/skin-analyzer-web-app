@@ -5,6 +5,7 @@ import { Camera, CheckCircle2, LockKeyhole, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+// --- Props: error, nama file, handler file select, dan handler buka kamera ---
 interface ImageUploadCardProps {
   error?: string | null;
   fileName?: string | null;
@@ -12,6 +13,7 @@ interface ImageUploadCardProps {
   onOpenCamera?: () => void;
 }
 
+// --- Komponen: kartu upload gambar dengan input file dan tombol kamera ---
 export function ImageUploadCard({
   error,
   fileName,
@@ -21,6 +23,7 @@ export function ImageUploadCard({
   return (
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-[var(--color-ash-cloud)] bg-white p-4 shadow-[0_24px_80px_rgba(0,38,43,0.08)] sm:p-7">
       <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[18px] border border-dashed border-[rgba(161,194,198,0.85)] bg-[linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] px-6 py-10 text-center">
+        {/* --- Ikon: ilustrasi upload gambar (kamera + ikon upload) --- */}
         <div className="relative mb-5 grid h-28 w-28 place-items-center rounded-full bg-[var(--color-pale-mint)] text-[var(--color-oceanic-deep)]">
           <Camera className="h-12 w-12" strokeWidth={1.55} />
           <span className="absolute bottom-4 right-3 grid h-7 w-7 place-items-center rounded-full bg-[var(--color-oceanic-deep)] text-white ring-4 ring-white">
@@ -28,6 +31,7 @@ export function ImageUploadCard({
           </span>
         </div>
 
+        {/* --- Header: judul dan panduan upload --- */}
         <h2 className="text-2xl font-semibold tracking-[0.004px] text-[var(--color-midnight-ink)]">
           Unggah Foto Anda
         </h2>
@@ -37,6 +41,7 @@ export function ImageUploadCard({
         </p>
 
         <div className="mt-7 flex w-full max-w-[320px] flex-col gap-4">
+          {/* --- Upload: tombol pilih file + input hidden --- */}
           <label className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--color-oceanic-deep)] px-7 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-midnight-ink)]">
             <Upload className="h-4 w-4" strokeWidth={2} />
             <span>{fileName ? "Ganti Foto" : "Unggah Foto"}</span>
@@ -50,12 +55,14 @@ export function ImageUploadCard({
             />
           </label>
 
+          {/* --- Divider: pemisah upload dan kamera --- */}
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs text-[var(--color-stone-whisper)]">
             <span className="h-px bg-[var(--color-ash-cloud)]/70" />
             <span>atau</span>
             <span className="h-px bg-[var(--color-ash-cloud)]/70" />
           </div>
 
+          {/* --- Kamera: tombol buka kamera --- */}
           <Button
             type="button"
             variant="outline"
@@ -67,6 +74,7 @@ export function ImageUploadCard({
           </Button>
         </div>
 
+        {/* --- Status: tampilkan nama file yang dipilih --- */}
         {fileName && (
           <div className="mt-5 inline-flex max-w-full items-center gap-2 rounded-full bg-[var(--color-pale-mint)] px-4 py-2 text-sm font-medium text-[var(--color-oceanic-deep)]">
             <CheckCircle2 className="h-4 w-4" />
@@ -74,8 +82,10 @@ export function ImageUploadCard({
           </div>
         )}
 
+        {/* --- Error: tampilkan pesan error validasi --- */}
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
+        {/* --- Privasi: jaminan foto tidak disimpan --- */}
         <p className="mt-7 flex items-center justify-center gap-2 text-xs text-[var(--color-slate-grille)]">
           <LockKeyhole className="h-3.5 w-3.5" />
           Foto Anda diproses dengan aman dan tidak pernah disimpan.

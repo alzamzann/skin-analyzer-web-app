@@ -6,6 +6,7 @@ import type {
   SkinAnalysisResult,
 } from "../types/skinAnalysis.types";
 
+// --- Peta error code backend -> pesan user Bahasa Indonesia ---
 const apiErrorTranslations: Record<string, string> = {
   unsupported_image_type: "Unggah gambar berformat JPG, PNG, atau WebP.",
   empty_image: "Unggah gambar sebelum memulai analisis.",
@@ -35,6 +36,7 @@ const apiErrorTranslations: Record<string, string> = {
     "Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.",
 };
 
+// --- Helper: ambil pesan error dari response API, fallback ke default ---
 function getLocalizedApiError(
   payload: { detail?: { code?: string; message?: string } } | null,
   fallback: string,
@@ -43,17 +45,21 @@ function getLocalizedApiError(
   return (code && apiErrorTranslations[code]) || payload?.detail?.message || fallback;
 }
 
+// --- API: POST gambar ke /api/analyze, return hasil analisis ---
 export async function analyzeSkinImage({
   image,
 }: SkinAnalysisInput): Promise<SkinAnalysisResult> {
+  // --- Buat FormData dan lampirkan gambar ---
   const formData = new FormData();
   formData.append("image", image);
 
+  // --- Kirim request POST ke backend ---
   const response = await fetch(endpoints.analyzeSkin, {
     method: "POST",
     body: formData,
   });
 
+  // --- Jika response error, ambil pesan dari backend ---
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
     const message = getLocalizedApiError(
@@ -66,6 +72,7 @@ export async function analyzeSkinImage({
   return response.json() as Promise<SkinAnalysisResult>;
 }
 
+// --- Filter request: parameter untuk fetch produk ---
 interface ProductFilterRequest {
   baumannType: string;
   mainCategory?: string;
@@ -73,12 +80,14 @@ interface ProductFilterRequest {
   signal?: AbortSignal;
 }
 
+// --- API: GET rekomendasi produk berdasarkan Baumann type + filter kategori ---
 export async function fetchRecommendedProducts({
   baumannType,
   mainCategory,
   subCategory,
   signal,
 }: ProductFilterRequest): Promise<ProductListResult> {
+  // --- Bangun query params: baumannType wajib, kategori opsional ---
   const searchParams = new URLSearchParams({ baumannType, topK: "5" });
 
   if (mainCategory && mainCategory !== "All") {
@@ -88,6 +97,7 @@ export async function fetchRecommendedProducts({
     searchParams.set("subCategory", subCategory);
   }
 
+  // --- Kirim request GET ke backend ---
   const response = await fetch(`${endpoints.products}?${searchParams.toString()}`, {
     signal,
   });

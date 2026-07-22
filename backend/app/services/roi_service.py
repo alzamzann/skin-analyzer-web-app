@@ -1,3 +1,4 @@
+# Import
 import base64
 from dataclasses import dataclass
 from io import BytesIO
@@ -14,6 +15,7 @@ from app.services.face_quality_service import FaceQualityValidationService
 from app.services.image_service import decode_image, encode_jpeg
 
 
+# Konfigurasi ROI Titik Landmark, Skala, dan Offset untuk Cropping
 ROI_CENTER_CONFIG = {
     "forehead": {"index": 151, "scale": 0.45, "offset_y": -0.05},
     "nose": {"index": 5, "scale": 0.40, "offset_y": 0.00},
@@ -22,12 +24,14 @@ ROI_CENTER_CONFIG = {
 }
 
 
+# Struktur crop ROI dan hasil ekstraksi
 @dataclass(frozen=True)
 class RoiCrop:
     region: str
     bounding_box: FaceBoundingBox
     image: Image.Image
 
+    # Konversi gambar ROI ke data URL base64
     def to_data_url(self) -> str:
         payload = base64.b64encode(encode_jpeg(self.image)).decode("ascii")
         return f"data:image/jpeg;base64,{payload}"
@@ -39,6 +43,7 @@ class RoiExtractionResult:
     landmark_count: int
     rois: list[RoiCrop]
 
+    # Gabungkan ROI menjadi tile 2x2 untuk inferensi
     def to_inference_image_bytes(self) -> bytes:
         if not self.rois:
             raise AnalysisError(
@@ -46,6 +51,7 @@ class RoiExtractionResult:
                 "roi_extraction_failed",
             )
 
+        # Buat canvas 2x2 dan tempel setiap ROI
         tile_size = self.rois[0].image.size[0]
         canvas = Image.new("RGB", (tile_size * 2, tile_size * 2), color=(255, 255, 255))
         for index, roi in enumerate(self.rois[:4]):
@@ -58,17 +64,20 @@ class RoiExtractionResult:
         return buffer.getvalue()
 
 
+# Hasil deteksi landmark dan crop
 @dataclass(frozen=True)
 class LandmarkDetectionResult:
     image: Image.Image
     face: DetectedFace
 
+    # Buat anotasi visual semua landmark pada gambar
     def to_annotated_data_url(self) -> str:
         preview, scale = _preview_canvas(self.image)
         draw = ImageDraw.Draw(preview)
         radius = max(2, round(max(preview.size) / 320))
         font = ImageFont.load_default()
 
+        # Gambar setiap landmark sebagai titik lingkaran
         for index, landmark in enumerate(self.face.landmarks):
             x = round(landmark.x * self.image.width * scale)
             y = round(landmark.y * self.image.height * scale)
@@ -91,11 +100,13 @@ class LandmarkCropResult:
     bounding_box: FaceBoundingBox
     crop: Image.Image
 
+    # Konversi crop ke data URL base64
     def to_crop_data_url(self) -> str:
         payload = base64.b64encode(encode_jpeg(self.crop)).decode("ascii")
         return f"data:image/jpeg;base64,{payload}"
 
 
+# Ekstraksi ROI
 class RoiService:
     def __init__(
         self,
@@ -109,12 +120,17 @@ class RoiService:
         )
         self.crop_size = crop_size
 
+    # Ekstraksi utama: pipeline decode -> detect -> quality -> crop
     def extract(self, image_bytes: bytes) -> RoiExtractionResult:
+        # Decode gambar dari bytes
         image = decode_image(image_bytes)
+        # Deteksi satu wajah
         face = self.face_detection_service.detect_single_face(image)
+        # Validasi kualitas wajah
         self.face_quality_service.validate_detected_face(image, face)
         rois: list[RoiCrop] = []
 
+        # Crop setiap region ROI (dahi, hidung, pipi)
         for region in ROI_CENTER_CONFIG:
             bounding_box = _region_box(face, region, image.width, image.height)
             rois.append(
@@ -125,6 +141,7 @@ class RoiService:
                 )
             )
 
+        # Validasi kualitas ROI yang sudah di-crop
         self.face_quality_service.validate_roi_images([roi.image for roi in rois])
         return RoiExtractionResult(
             face_bounding_box=face.bounding_box,
@@ -132,6 +149,7 @@ class RoiService:
             rois=rois,
         )
 
+    # deteksi landmark dan crop per landmark
     def detect_landmarks(self, image_bytes: bytes) -> LandmarkDetectionResult:
         image = decode_image(image_bytes)
         face = self.face_detection_service.detect_single_face(image)
@@ -148,6 +166,7 @@ class RoiService:
         face = self.face_detection_service.detect_single_face(image)
         self.face_quality_service.validate_detected_face(image, face)
 
+        # Validasi indeks landmark
         if landmark_index < 0 or landmark_index >= len(face.landmarks):
             raise AnalysisError(
                 f"Landmark index must be between 0 and {len(face.landmarks) - 1}.",
@@ -155,6 +174,7 @@ class RoiService:
                 status_code=422,
             )
 
+        # Hitung bounding box dari landmark yang dipilih
         landmark = face.landmarks[landmark_index]
         center_x = round(landmark.x * image.width)
         center_y = round(landmark.y * image.height)
@@ -170,6 +190,7 @@ class RoiService:
         )
 
 
+# Bounding box region
 def _region_box(
     face: DetectedFace,
     region: str,
@@ -178,12 +199,14 @@ def _region_box(
 ) -> FaceBoundingBox:
     config = ROI_CENTER_CONFIG[region]
     landmark_index = config["index"]
+    # Validasi ketersediaan landmark
     if landmark_index >= len(face.landmarks):
         raise AnalysisError(
             f"Missing landmark {landmark_index} for the {region.replace('_', ' ')} region.",
             "roi_extraction_failed",
         )
 
+    # Hitung pusat crop dari landmark dan offset
     landmark = face.landmarks[landmark_index]
     center_x = round(landmark.x * image_width)
     center_y = round(
@@ -193,6 +216,7 @@ def _region_box(
     return _fixed_square_box(center_x, center_y, source_size, (image_width, image_height))
 
 
+# crop, resize, dan clamp gambar
 def _crop_region(
     image: Image.Image,
     box: FaceBoundingBox,
@@ -214,11 +238,13 @@ def _fixed_square_box(
     half_width = width // 2
     half_height = height // 2
 
+    # Clamp agar tetap dalam batas gambar
     x = _clamp(center_x - half_width, 0, image_width - width)
     y = _clamp(center_y - half_height, 0, image_height - height)
     return FaceBoundingBox(x=x, y=y, width=width, height=height)
 
 
+# canvas preview
 def _preview_canvas(image: Image.Image, max_side: int = 960) -> tuple[Image.Image, float]:
     scale = min(max_side / max(image.size), 1.0)
     if scale == 1.0:
@@ -235,6 +261,7 @@ def _draw_label(
     y: int,
     font: ImageFont.ImageFont,
 ) -> None:
+    # Gambar background untuk teks label
     text_box = draw.textbbox((x, y), text, font=font)
     padding = 1
     background_box = (

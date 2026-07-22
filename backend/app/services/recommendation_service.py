@@ -1,3 +1,4 @@
+# Import
 from app.repositories.contracts import CatalogRepositoryProtocol
 from app.schemas.analysis import (
     ProductCategoryFilter,
@@ -14,10 +15,12 @@ from app.services.product_categories import (
 from app.services.text import normalize_text, split_codes, split_terms
 
 
+# Kelas utama rekomendasi bahan dan produk
 class RecommendationService:
     def __init__(self, catalog_repository: CatalogRepositoryProtocol):
         self.catalog_repository = catalog_repository
 
+    # Daftar filter kategori
     def get_available_filters(self) -> list[str]:
         return [
             "All",
@@ -39,9 +42,11 @@ class RecommendationService:
             ).items()
         ]
 
+    # Rekomendasi bahan berdasarkan tipe Baumann dan tag ALL
     def recommend_ingredients(
         self, baumann_type: str, include_all: bool = True
     ) -> list[RecommendedIngredient]:
+        # Filter bahan yang sesuai dengan tipe Baumann
         records = [
             ingredient
             for ingredient in self.catalog_repository.ingredients
@@ -50,6 +55,7 @@ class RecommendationService:
 
         return [self._to_ingredient_schema(record) for record in records]
 
+    # Rekomendasi produk skor, peringkat, dan filtering
     def recommend_products(
         self,
         baumann_type: str,
@@ -58,6 +64,7 @@ class RecommendationService:
         sub_category: str | None = None,
         top_k: int = 5,
     ) -> tuple[list[RecommendedProduct], int, int]:
+        # Ambil bahan yang sesuai dengan tipe Baumann
         ingredient_records = [
             ingredient
             for ingredient in self.catalog_repository.ingredients
@@ -66,12 +73,14 @@ class RecommendationService:
 
         total_ingredients = len(ingredient_records)
 
+        # Filter produk berdasarkan kategori
         products = self._filter_products(
             category=category,
             main_category=main_category,
             sub_category=sub_category,
         )
 
+        # Skor setiap produk berdasarkan kecocokan bahan
         scored = [
             self._score_product(
                 product=product,
@@ -80,6 +89,7 @@ class RecommendationService:
             )
             for product in products
         ]
+        # Hapus produk dengan skor 0 dan urutkan berdasarkan skor
         scored = [product for product in scored if product.similarity_score > 0]
         scored.sort(
             key=lambda product: (
@@ -90,13 +100,16 @@ class RecommendationService:
         )
         return scored[:top_k], len(scored), total_ingredients
 
+    # Rekomendasi rutinitas (satu produk teratas per kategori)
     def recommend_routine_products(self, baumann_type: str) -> list[RecommendedProduct]:
+        # Ambil kategori yang tersedia
         available_main_categories = {
             category_filter.main_category
             for category_filter in self.get_product_category_filters()
         }
         routine_products = []
 
+        # Ambil satu produk teratas per kategori utama
         for main_category in ROUTINE_MAIN_CATEGORY_ORDER:
             if main_category not in available_main_categories:
                 continue
@@ -110,6 +123,7 @@ class RecommendationService:
 
         return routine_products
 
+    # Filter normalisasi dan seleksi katalog
     def _filter_products(
         self,
         category: str | None,
@@ -120,6 +134,7 @@ class RecommendationService:
         normalized_main = self._normalize_main_category(main_category, groups)
         legacy_subcategory = None if category in {None, "All"} else category
 
+        # Validasi kesesuaian category dan subCategory
         if legacy_subcategory and sub_category:
             if normalize_subcategory(legacy_subcategory) != normalize_subcategory(
                 sub_category
@@ -133,6 +148,7 @@ class RecommendationService:
             else None
         )
 
+        # Filter berdasarkan subcategory jika ditentukan
         if normalized_subcategory:
             available_subcategories = {
                 subcategory
@@ -154,6 +170,7 @@ class RecommendationService:
                 if product.category == normalized_subcategory
             ]
 
+        # Filter berdasarkan main_category jika ditentukan
         if normalized_main:
             allowed_subcategories = set(groups[normalized_main])
             return [
@@ -162,6 +179,7 @@ class RecommendationService:
                 if product.category in allowed_subcategories
             ]
 
+        # Kembalikan semua produk jika tidak ada filter
         return self.catalog_repository.products
 
     def _normalize_main_category(
@@ -172,6 +190,7 @@ class RecommendationService:
         if not main_category or main_category == "All":
             return None
 
+        # Cari kategori yang cocok (case-insensitive)
         matching_category = next(
             (
                 category
@@ -184,10 +203,12 @@ class RecommendationService:
             raise ValueError(f"Unknown main category: {main_category}")
         return matching_category
 
+    # Utilitas kesesuaian, konversi skema, dan pencocokan
     def _is_suitable(
         self, ingredient: IngredientRecord, baumann_type: str, include_all: bool
     ) -> bool:
         best_for_codes = split_codes(ingredient.best_for)
+        # Cek apakah bahan sesuai dengan tipe Baumann
         if baumann_type.upper() in best_for_codes:
             return True
         return include_all and "ALL" in best_for_codes
@@ -195,6 +216,7 @@ class RecommendationService:
     def _to_ingredient_schema(
         self, ingredient: IngredientRecord
     ) -> RecommendedIngredient:
+        # Konversi record domain ke API
         reason = (
             ingredient.topical_use
             or ingredient.can_used_to
@@ -219,15 +241,18 @@ class RecommendationService:
         ingredient_records: list[IngredientRecord],
         total_ingredients: int,
     ) -> RecommendedProduct:
+        # Normalisasi bahan produk
         normalized_product_ingredients = normalize_text(product.ingredients)
         matched = []
 
+        # Cocokkan bahan yang sesuai
         for ingredient in ingredient_records:
             if self._ingredient_matches_product(
                 ingredient, normalized_product_ingredients
             ):
                 matched.append(ingredient.name)
 
+        # Hitung skor kecocokan
         matched_count = len(matched)
         score = round(matched_count / max(total_ingredients, 1), 3)
 
@@ -251,12 +276,15 @@ class RecommendationService:
     def _ingredient_matches_product(
         self, ingredient: IngredientRecord, normalized_product_ingredients: str
     ) -> bool:
+        # Cek apakah ada term bahan yang muncul di produk
         terms = self._ingredient_match_terms(ingredient)
         return any(term in normalized_product_ingredients for term in terms)
 
     def _ingredient_match_terms(self, ingredient: IngredientRecord) -> list[str]:
+        # Buat daftar term dari nama INCI
         terms = split_terms(ingredient.inci_name)
 
+        # Filter term terlalu pendek dan duplikat
         cleaned_terms = []
         for term in terms:
             if not term or len(term) < 3:

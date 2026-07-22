@@ -1,3 +1,4 @@
+# Import
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ from PIL import Image
 from app.services.errors import AnalysisError
 
 
+# Struktur wajah terdeteksi (bounding box, landmark)
 @dataclass(frozen=True)
 class FaceBoundingBox:
     x: int
@@ -30,12 +32,14 @@ class DetectedFace:
     landmarks: list[FaceLandmark]
 
 
+# Kelas utama
 class MediaPipeFaceDetectionService:
     def __init__(self, model_path: Path):
         self.model_path = model_path
         self._landmarker = None
         self._lock = Lock()
 
+    # Deteksi wajah (eksekusi dan validasi satu wajah)
     def detect_single_face(self, image: Image.Image) -> DetectedFace:
         landmarker = self._get_landmarker()
         mp_image = self._to_mediapipe_image(image)
@@ -43,6 +47,7 @@ class MediaPipeFaceDetectionService:
             result = landmarker.detect(mp_image)
         faces = result.face_landmarks
 
+        # Validasi keberadaan wajah dan jumlahnya
         if not faces:
             raise AnalysisError(
                 "No face was detected. Upload a clear front-facing face photo.",
@@ -55,6 +60,7 @@ class MediaPipeFaceDetectionService:
                 "multiple_faces_detected",
             )
 
+        # Konversi landmark MediaPipe ke struktur DetectedFace
         landmarks = [
             FaceLandmark(x=point.x, y=point.y, z=point.z) for point in faces[0]
         ]
@@ -63,10 +69,12 @@ class MediaPipeFaceDetectionService:
             landmarks=landmarks,
         )
 
+    # Inisialisasi model MediaPipe
     def _get_landmarker(self):
         if self._landmarker is not None:
             return self._landmarker
 
+        # Cek keberadaan file model
         if not self.model_path.exists():
             raise AnalysisError(
                 "Face detection model is missing. Run scripts/download_face_landmarker.py.",
@@ -76,6 +84,7 @@ class MediaPipeFaceDetectionService:
 
         mp = _import_mediapipe()
 
+        # Konfigurasi landmarker
         options = mp.tasks.vision.FaceLandmarkerOptions(
             base_options=mp.tasks.BaseOptions(
                 model_asset_path=str(self.model_path),
@@ -95,12 +104,14 @@ class MediaPipeFaceDetectionService:
             ) from error
         return self._landmarker
 
+    # Penutupan dan konversi gambar
     def close(self) -> None:
         with self._lock:
             if self._landmarker is not None:
                 self._landmarker.close()
                 self._landmarker = None
 
+    # Konversi PIL Image ke format MediaPipe
     @staticmethod
     def _to_mediapipe_image(image: Image.Image):
         mp = _import_mediapipe()
@@ -109,6 +120,7 @@ class MediaPipeFaceDetectionService:
         return mp.Image(image_format=mp.ImageFormat.SRGB, data=image_array)
 
 
+# Import mediapipe dan validasi keberadaan library
 def _import_mediapipe():
     os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
     try:
@@ -127,11 +139,13 @@ def _build_face_box(
     image_width: int,
     image_height: int,
 ) -> FaceBoundingBox:
+    # Hitung bounding box dari koordinat landmark
     min_x = min(point.x for point in landmarks) * image_width
     max_x = max(point.x for point in landmarks) * image_width
     min_y = min(point.y for point in landmarks) * image_height
     max_y = max(point.y for point in landmarks) * image_height
 
+    # Clamp nilai agar tetap dalam batas gambar
     x = _clamp_int(round(min_x), 0, image_width - 1)
     y = _clamp_int(round(min_y), 0, image_height - 1)
     width = _clamp_int(round(max_x - min_x), 1, image_width - x)

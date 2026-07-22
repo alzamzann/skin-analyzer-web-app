@@ -25,6 +25,7 @@ import { useAnalyzeSkin } from "@/features/skin-analysis/hooks/useAnalyzeSkin";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
 import { saveAnalysisResult } from "@/features/results/utils/analysisResultStorage";
 
+// --- Data: panduan foto untuk hasil terbaik ---
 const guidance = [
   { icon: Focus, label: "Wajah menghadap depan dan berada di tengah" },
   { icon: SunMedium, label: "Pencahayaan alami yang baik" },
@@ -32,15 +33,21 @@ const guidance = [
   { icon: Smile, label: "Ekspresi netral" },
 ];
 
+// --- Halaman: upload gambar dan jalankan analisis kulit ---
 export default function AnalyzePage() {
   const router = useRouter();
+
+  // --- State: kontrol visibilitas kamera dan file pending ---
   const [showCamera, setShowCamera] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
+
+  // --- Hooks: upload gambar dan analisis kulit ---
   const { error: uploadError, file, previewUrl, selectFile } = useImageUpload();
   const { analyze, error: analysisError, result, status } = useAnalyzeSkin();
   const isAnalyzing = status === "loading";
 
+  // --- Stage: simpan file sementara untuk crop dialog ---
   const stageFileForPreview = (nextFile: File | null) => {
     if (!nextFile) {
       return;
@@ -56,6 +63,7 @@ export default function AnalyzePage() {
     });
   };
 
+  // --- Stage: bersihkan file sementara ---
   const closePendingPreview = () => {
     if (pendingPreviewUrl) {
       URL.revokeObjectURL(pendingPreviewUrl);
@@ -65,11 +73,13 @@ export default function AnalyzePage() {
     setPendingPreviewUrl(null);
   };
 
+  // --- Stage: konfirmasi crop, pindahkan ke state utama ---
   const confirmPendingFile = (croppedFile: File) => {
     selectFile(croppedFile);
     closePendingPreview();
   };
 
+  // --- Analyze: jalankan analisis, simpan hasil, navigasi ke /result ---
   const handleAnalyze = async () => {
     if (!file) {
       return;
@@ -84,6 +94,7 @@ export default function AnalyzePage() {
 
   return (
     <main className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#f7fbfb_0%,#ebebeb_52%,#ffffff_100%)] text-[var(--color-midnight-ink)]">
+      {/* --- Navbar: navigasi halaman --- */}
       <Navbar
         action={
           <Button asChild variant="outline" size="sm" className="gap-2">
@@ -105,6 +116,7 @@ export default function AnalyzePage() {
 
       <div className="mx-auto flex min-h-[calc(100dvh-99px)] w-full max-w-[1480px] flex-col px-4 sm:px-6">
 
+        {/* --- Hero: judul halaman analisis --- */}
         <section className="mx-auto w-full max-w-5xl pb-8 pt-14 text-center sm:pt-16">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-deep-teal)]">
             Analisis kulit
@@ -119,10 +131,12 @@ export default function AnalyzePage() {
           </p>
         </section>
 
+        {/* --- Upload: kartu upload + pratinjau + tombol analisis --- */}
         <section
           id="upload"
           className="mx-auto grid w-full max-w-4xl gap-6 overflow-hidden pb-6 lg:grid-cols-[1.08fr_0.92fr]"
         >
+          {/* --- Upload card: input file + tombol kamera --- */}
           <ImageUploadCard
             error={uploadError}
             fileName={file?.name}
@@ -130,6 +144,7 @@ export default function AnalyzePage() {
             onOpenCamera={() => setShowCamera(true)}
           />
 
+          {/* --- Sidebar: pratinjau gambar + tombol analisis --- */}
           <aside className="space-y-4 rounded-[24px] border border-[var(--color-ash-cloud)] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,38,43,0.06)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
@@ -139,7 +154,9 @@ export default function AnalyzePage() {
                 Gambar analisis yang dikonfirmasi
               </h2>
             </div>
+            {/* --- Image preview: tampilkan gambar yang sudah dipilih --- */}
             <ImagePreview imageUrl={previewUrl} />
+            {/* --- Tombol analisis: aktif jika sudah ada file --- */}
             <Button
               type="button"
               size="lg"
@@ -149,13 +166,17 @@ export default function AnalyzePage() {
             >
               {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
             </Button>
+            {/* --- Loading: tampilkan saat proses analisis --- */}
             {isAnalyzing && <AnalysisLoading />}
+            {/* --- Error: tampilkan jika analisis gagal --- */}
             {analysisError && <AnalysisError message={analysisError} />}
+            {/* --- Success: notifikasi analisis selesai --- */}
             {status === "success" && result && (
               <div className="rounded-[18px] border border-[var(--color-ash-cloud)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
                 Analisis selesai. Hasil Anda siap ditinjau pada halaman hasil.
               </div>
             )}
+            {/* --- Tip: panduan penggunaan gambar --- */}
             <div className="flex items-start gap-3 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm leading-6 text-[var(--color-slate-grille)]">
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-oceanic-deep)]" />
               <p>
@@ -167,14 +188,17 @@ export default function AnalyzePage() {
           </aside>
         </section>
 
+        {/* --- Guidance: tips foto untuk hasil terbaik --- */}
         <section
           id="guidance"
           className="mx-auto mb-8 grid w-full max-w-4xl gap-0 overflow-hidden rounded-[18px] border border-[var(--color-ash-cloud)] bg-white/80 shadow-[0_16px_50px_rgba(0,38,43,0.05)] md:grid-cols-[1.1fr_repeat(4,1fr)]"
         >
+          {/* --- Label: judul panduan --- */}
           <div className="flex items-center gap-3 border-b border-[var(--color-ash-cloud)]/60 p-5 text-[var(--color-oceanic-deep)] md:border-b-0 md:border-r">
             <Sparkles className="h-5 w-5" />
             <span className="text-sm font-semibold">Untuk hasil terbaik</span>
           </div>
+          {/* --- List: setiap panduan dalam kolom --- */}
           {guidance.map((item) => {
             const Icon = item.icon;
 
@@ -195,6 +219,7 @@ export default function AnalyzePage() {
           })}
         </section>
 
+        {/* --- Footer: copyright --- */}
         <footer className="mt-auto border-t border-[var(--color-ash-cloud)]/60 py-8 text-center">
           <div className="flex flex-col items-center justify-center gap-4 text-sm text-[var(--color-slate-grille)] sm:flex-row">
             <span className="text-xl font-bold tracking-[-0.02em] text-[var(--color-oceanic-deep)]">
@@ -210,6 +235,7 @@ export default function AnalyzePage() {
         </footer>
       </div>
 
+      {/* --- Dialog: crop dialog jika ada file pending --- */}
       {pendingFile && pendingPreviewUrl && (
         <ImageConfirmationDialog
           key={pendingPreviewUrl}
@@ -221,6 +247,7 @@ export default function AnalyzePage() {
         />
       )}
 
+      {/* --- Dialog: kamera modal jika showCamera aktif --- */}
       {showCamera && (
         <CameraCapture
           onCapture={stageFileForPreview}

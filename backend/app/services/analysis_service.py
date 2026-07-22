@@ -1,3 +1,4 @@
+# Import
 from uuid import uuid4
 
 from app.schemas.analysis import AnalysisResult
@@ -11,12 +12,14 @@ from app.services.roi_service import (
 )
 
 
+# Disclaimer
 DISCLAIMER = (
     "Dermalyzer provides educational skincare guidance only and is not a "
     "medical diagnosis. Consult a dermatologist for medical concerns."
 )
 
 
+# Pipeline utama analisis
 class AnalysisService:
     def __init__(
         self,
@@ -30,11 +33,15 @@ class AnalysisService:
         self.recommendation_service = recommendation_service
         self.roi_service = roi_service
 
+    # Analisis utama (pipeline lengkap dari citra hingga rekomendasi)
     def analyze(self, image_bytes: bytes) -> AnalysisResult:
+        # Ekstraksi ROI dari wajah yang terdeteksi
         roi_result = self.roi_service.extract(image_bytes)
+        # Inferensi model pada gambar ROI
         predictions = self.inference_service.predict_rois(
             [roi.image for roi in roi_result.rois]
         )
+        # Pemetaan prediksi ke tipe Baumann
         (
             baumann_type,
             attributes,
@@ -42,6 +49,7 @@ class AnalysisService:
             confidence,
             description,
         ) = self.baumann_service.map_predictions(predictions)
+        # Rekomendasi bahan dan produk
         ingredients = self.recommendation_service.recommend_ingredients(baumann_type)
         products = self.recommendation_service.recommend_routine_products(baumann_type)
 
@@ -60,6 +68,7 @@ class AnalysisService:
             disclaimer=DISCLAIMER,
         )
 
+    # Endpoint preview: delegasi ke RoiService
     def extract_roi_preview(self, image_bytes: bytes) -> RoiExtractionResult:
         return self.roi_service.extract(image_bytes)
 

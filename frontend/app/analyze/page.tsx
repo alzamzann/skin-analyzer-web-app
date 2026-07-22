@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   Focus,
   LockKeyhole,
+  Loader2,
   Smile,
   Sparkles,
   SunMedium,
@@ -16,16 +17,13 @@ import {
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { AnalysisError } from "@/features/skin-analysis/components/AnalysisError";
-import { BaumannQuiz } from "@/features/skin-analysis/components/BaumannQuiz";
 import { CameraCapture } from "@/features/skin-analysis/components/CameraCapture";
 import { ImageConfirmationDialog } from "@/features/skin-analysis/components/ImageConfirmationDialog";
 import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
-import { QuizLoading } from "@/features/skin-analysis/components/QuizLoading";
-import { useAnalyzeSkin } from "@/features/skin-analysis/hooks/useAnalyzeSkin";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
-import type { QuizAxisScores } from "@/features/skin-analysis/types/quiz.types";
-import { saveAnalysisResult } from "@/features/results/utils/analysisResultStorage";
+import { validateFaceImage } from "@/features/skin-analysis/services/skinAnalysisApi";
+import { savePendingImage } from "@/features/skin-analysis/utils/imageStorage";
 
 // --- Data: panduan foto untuk hasil terbaik ---
 const guidance = [
@@ -35,7 +33,7 @@ const guidance = [
   { icon: Smile, label: "Ekspresi netral" },
 ];
 
-// --- Halaman: upload gambar dan jalankan analisis kulit ---
+// --- Halaman: upload gambar, validasi wajah, navigasi ke quiz ---
 export default function AnalyzePage() {
   const router = useRouter();
 
@@ -44,14 +42,12 @@ export default function AnalyzePage() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
 
-  // --- State: quiz ---
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizScores, setQuizScores] = useState<QuizAxisScores | null>(null);
+  // --- State: validasi wajah ---
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  // --- Hooks: upload gambar dan analisis kulit ---
-  const { error: uploadError, file, previewUrl, selectFile } = useImageUpload();
-  const { analyze, error: analysisError, result, status } = useAnalyzeSkin();
-  const isAnalyzing = status === "loading";
+  // --- Hooks: upload gambar ---
+  const { error: uploadError, file, selectFile } = useImageUpload();
 
   // --- Stage: simpan file sementara untuk crop dialog ---
   const stageFileForPreview = (nextFile: File | null) => {
@@ -79,28 +75,27 @@ export default function AnalyzePage() {
     setPendingPreviewUrl(null);
   };
 
-  // --- Stage: konfirmasi crop, pindahkan ke state utama ---
-  const confirmPendingFile = (croppedFile: File) => {
-    selectFile(croppedFile);
-    closePendingPreview();
-  };
+  // --- Stage: konfirmasi crop, validasi wajah, navigasi ke quiz ---
+  const confirmPendingFile = async (croppedFile: File) => {
+    setIsValidating(true);
+    setValidationError(null);
 
-  // --- Quiz: selesaikan quiz dan simpan scores ---
-  const handleQuizComplete = (scores: QuizAxisScores) => {
-    setQuizScores(scores);
-    setQuizCompleted(true);
-  };
+    try {
+      // 1. Validasi wajah via backend
+      await validateFaceImage(croppedFile);
 
-  // --- Analyze: jalankan analisis, simpan hasil, navigasi ke /result ---
-  const handleAnalyze = async () => {
-    if (!file) {
-      return;
-    }
-
-    const nextResult = await analyze(file, quizScores);
-    if (nextResult) {
-      saveAnalysisResult(nextResult);
-      router.push("/result");
+      // 2. Jika pass, simpan gambar dan navigasi ke quiz
+      selectFile(croppedFile);
+      await savePendingImage(croppedFile);
+      closePendingPreview();
+      router.push("/quiz");
+    } catch (error) {
+      // 3. Jika gagal, tampilkan error
+      setValidationError(
+        error instanceof Error ? error.message : "Validasi wajah gagal.",
+      );
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -143,7 +138,7 @@ export default function AnalyzePage() {
           </p>
         </section>
 
-        {/* --- Upload: kartu upload + pratinjau + tombol analisis --- */}
+        {/* --- Upload: kartu upload + pratinjau --- */}
         <section
           id="upload"
           className="mx-auto grid w-full max-w-4xl gap-6 overflow-hidden pb-6 lg:grid-cols-[1.08fr_0.92fr]"
@@ -156,7 +151,7 @@ export default function AnalyzePage() {
             onOpenCamera={() => setShowCamera(true)}
           />
 
-          {/* --- Sidebar: pratinjau gambar + quiz + tombol analisis --- */}
+          {/* --- Sidebar: pratinjau gambar + status validasi --- */}
           <aside className="space-y-4 rounded-[24px] border border-[var(--color-ash-cloud)] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,38,43,0.06)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
@@ -167,38 +162,26 @@ export default function AnalyzePage() {
               </h2>
             </div>
             {/* --- Image preview: tampilkan gambar yang sudah dipilih --- */}
-            <ImagePreview imageUrl={previewUrl} />
+            <ImagePreview imageUrl={file ? URL.createObjectURL(file) : null} />
 
-            {/* --- Quiz: tampilkan setelah file dipilih dan belum selesai quiz --- */}
-            {file && !quizCompleted && (
-              <BaumannQuiz onComplete={handleQuizComplete} />
-            )}
-
-            {/* --- Tombol analisis: aktif jika sudah ada file dan quiz selesai --- */}
-            {quizCompleted && (
-              <>
-                <Button
-                  type="button"
-                  size="lg"
-                  disabled={!file || isAnalyzing}
-                  onClick={handleAnalyze}
-                  className="h-12 w-full gap-2"
-                >
-                  {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
-                </Button>
-                {/* --- Loading: tampilkan saat proses analisis --- */}
-                {isAnalyzing && <QuizLoading />}
-              </>
-            )}
-
-            {/* --- Error: tampilkan jika analisis gagal --- */}
-            {analysisError && <AnalysisError message={analysisError} />}
-            {/* --- Success: notifikasi analisis selesai --- */}
-            {status === "success" && result && (
-              <div className="rounded-[18px] border border-[var(--color-ash-cloud)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
-                Analisis selesai. Hasil Anda siap ditinjau pada halaman hasil.
+            {/* --- Loading validasi: tampilkan saat validasi wajah --- */}
+            {isValidating && (
+              <div className="flex items-center gap-2 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm text-[var(--color-slate-grille)]">
+                <Loader2 className="h-4 w-4 animate-spin text-[var(--color-oceanic-deep)]" />
+                Memvalidasi wajah...
               </div>
             )}
+
+            {/* --- Error validasi: tampilkan jika validasi gagal --- */}
+            {validationError && <AnalysisError message={validationError} />}
+
+            {/* --- Info: instruksi setelah crop --- */}
+            {file && !isValidating && !validationError && (
+              <div className="rounded-[18px] border border-[var(--color-spring-leaf)] bg-[var(--color-pale-mint)] p-4 text-sm leading-6 text-[var(--color-oceanic-deep)]">
+                Wajah terdeteksi! Klik &quot;Gunakan hasil crop&quot; untuk melanjutkan ke quiz.
+              </div>
+            )}
+
             {/* --- Tip: panduan penggunaan gambar --- */}
             <div className="flex items-start gap-3 rounded-[18px] bg-[var(--color-fog-gray)] p-4 text-sm leading-6 text-[var(--color-slate-grille)]">
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-oceanic-deep)]" />

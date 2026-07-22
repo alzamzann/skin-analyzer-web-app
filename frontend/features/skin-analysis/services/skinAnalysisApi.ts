@@ -78,6 +78,28 @@ export async function analyzeSkinImage({
   return response.json() as Promise<SkinAnalysisResult>;
 }
 
+// --- API: validasi wajah via /analyze/roi-preview ---
+export async function validateFaceImage(image: File): Promise<boolean> {
+  const formData = new FormData();
+  formData.append("image", image);
+
+  const response = await fetch(endpoints.validateFace, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    const message = getLocalizedApiError(
+      payload,
+      "Validasi wajah gagal. Coba gunakan gambar lain.",
+    );
+    throw new Error(message);
+  }
+
+  return true;
+}
+
 // --- Filter request: parameter untuk fetch produk ---
 interface ProductFilterRequest {
   baumannType: string;

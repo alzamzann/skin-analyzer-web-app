@@ -1,5 +1,11 @@
 export interface SkinAnalysisInput {
   image: File;
+  quizScores?: {
+    oiliness: number;
+    sensitivity: number;
+    pigmentation: number;
+    wrinkle_tendency: number;
+  } | null;
 }
 
 export interface ProductCategoryFilterOption {

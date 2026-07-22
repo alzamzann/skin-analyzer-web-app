@@ -16,13 +16,15 @@ import {
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
 import { AnalysisError } from "@/features/skin-analysis/components/AnalysisError";
-import { AnalysisLoading } from "@/features/skin-analysis/components/AnalysisLoading";
+import { BaumannQuiz } from "@/features/skin-analysis/components/BaumannQuiz";
 import { CameraCapture } from "@/features/skin-analysis/components/CameraCapture";
 import { ImageConfirmationDialog } from "@/features/skin-analysis/components/ImageConfirmationDialog";
 import { ImagePreview } from "@/features/skin-analysis/components/ImagePreview";
 import { ImageUploadCard } from "@/features/skin-analysis/components/ImageUploadCard";
+import { QuizLoading } from "@/features/skin-analysis/components/QuizLoading";
 import { useAnalyzeSkin } from "@/features/skin-analysis/hooks/useAnalyzeSkin";
 import { useImageUpload } from "@/features/skin-analysis/hooks/useImageUpload";
+import type { QuizAxisScores } from "@/features/skin-analysis/types/quiz.types";
 import { saveAnalysisResult } from "@/features/results/utils/analysisResultStorage";
 
 // --- Data: panduan foto untuk hasil terbaik ---
@@ -41,6 +43,10 @@ export default function AnalyzePage() {
   const [showCamera, setShowCamera] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null);
+
+  // --- State: quiz ---
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [quizScores, setQuizScores] = useState<QuizAxisScores | null>(null);
 
   // --- Hooks: upload gambar dan analisis kulit ---
   const { error: uploadError, file, previewUrl, selectFile } = useImageUpload();
@@ -79,13 +85,19 @@ export default function AnalyzePage() {
     closePendingPreview();
   };
 
+  // --- Quiz: selesaikan quiz dan simpan scores ---
+  const handleQuizComplete = (scores: QuizAxisScores) => {
+    setQuizScores(scores);
+    setQuizCompleted(true);
+  };
+
   // --- Analyze: jalankan analisis, simpan hasil, navigasi ke /result ---
   const handleAnalyze = async () => {
     if (!file) {
       return;
     }
 
-    const nextResult = await analyze(file);
+    const nextResult = await analyze(file, quizScores);
     if (nextResult) {
       saveAnalysisResult(nextResult);
       router.push("/result");
@@ -144,7 +156,7 @@ export default function AnalyzePage() {
             onOpenCamera={() => setShowCamera(true)}
           />
 
-          {/* --- Sidebar: pratinjau gambar + tombol analisis --- */}
+          {/* --- Sidebar: pratinjau gambar + quiz + tombol analisis --- */}
           <aside className="space-y-4 rounded-[24px] border border-[var(--color-ash-cloud)] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,38,43,0.06)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-deep-teal)]">
@@ -156,18 +168,29 @@ export default function AnalyzePage() {
             </div>
             {/* --- Image preview: tampilkan gambar yang sudah dipilih --- */}
             <ImagePreview imageUrl={previewUrl} />
-            {/* --- Tombol analisis: aktif jika sudah ada file --- */}
-            <Button
-              type="button"
-              size="lg"
-              disabled={!file || isAnalyzing}
-              onClick={handleAnalyze}
-              className="h-12 w-full gap-2"
-            >
-              {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
-            </Button>
-            {/* --- Loading: tampilkan saat proses analisis --- */}
-            {isAnalyzing && <AnalysisLoading />}
+
+            {/* --- Quiz: tampilkan setelah file dipilih dan belum selesai quiz --- */}
+            {file && !quizCompleted && (
+              <BaumannQuiz onComplete={handleQuizComplete} />
+            )}
+
+            {/* --- Tombol analisis: aktif jika sudah ada file dan quiz selesai --- */}
+            {quizCompleted && (
+              <>
+                <Button
+                  type="button"
+                  size="lg"
+                  disabled={!file || isAnalyzing}
+                  onClick={handleAnalyze}
+                  className="h-12 w-full gap-2"
+                >
+                  {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
+                </Button>
+                {/* --- Loading: tampilkan saat proses analisis --- */}
+                {isAnalyzing && <QuizLoading />}
+              </>
+            )}
+
             {/* --- Error: tampilkan jika analisis gagal --- */}
             {analysisError && <AnalysisError message={analysisError} />}
             {/* --- Success: notifikasi analisis selesai --- */}

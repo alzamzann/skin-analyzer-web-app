@@ -1,5 +1,10 @@
 # Impor: dependensi pemetaan Baumann
-from app.schemas.analysis import BaumannMapping, LabelPrediction, SkinAttributes
+from app.schemas.analysis import BaumannMapping, LabelPrediction, QuizAxisScores, SkinAttributes
+
+# Bobot hybrid scoring
+ML_WEIGHT = 0.6
+QUIZ_WEIGHT = 0.4
+THRESHOLD = 0.6
 
 
 # Konfigurasi pemetaan label prediksi ke dimensi Baumann
@@ -43,43 +48,45 @@ def any_detected_for_labels(
 class BaumannService:
     # Pemetaan 4 dimensi, kode, atribut, dan deskripsi
     def map_predictions(
-        self, predictions: list[LabelPrediction]
+        self,
+        predictions: list[LabelPrediction],
+        quiz_scores: QuizAxisScores | None = None,
     ) -> tuple[str, SkinAttributes, BaumannMapping, float, str]:
-        # Hitung skor tertinggi per sumbu
-        oiliness = max_score_for_labels(
+        # Hitung skor ML tertinggi per sumbu
+        ml_oiliness = max_score_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
         )
-        sensitivity = max_score_for_labels(
+        ml_sensitivity = max_score_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["sensitivity"],
         )
-        pigmentation = max_score_for_labels(
+        ml_pigmentation = max_score_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["pigmentation"],
         )
-        wrinkle_tendency = max_score_for_labels(
+        ml_wrinkle = max_score_for_labels(
             predictions,
             BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
         )
 
-        # Cek apakah ada label yang terdeteksi per sumbu
-        oiliness_detected = any_detected_for_labels(
-            predictions,
-            BAUMANN_AXIS_SOURCE_LABELS["oiliness"],
-        )
-        sensitivity_detected = any_detected_for_labels(
-            predictions,
-            BAUMANN_AXIS_SOURCE_LABELS["sensitivity"],
-        )
-        pigmentation_detected = any_detected_for_labels(
-            predictions,
-            BAUMANN_AXIS_SOURCE_LABELS["pigmentation"],
-        )
-        wrinkle_detected = any_detected_for_labels(
-            predictions,
-            BAUMANN_AXIS_SOURCE_LABELS["wrinkle_tendency"],
-        )
+        # Hybrid scoring: ML (60%) + Quiz (40%)
+        if quiz_scores:
+            oiliness = (ml_oiliness * ML_WEIGHT) + (quiz_scores.oiliness * QUIZ_WEIGHT)
+            sensitivity = (ml_sensitivity * ML_WEIGHT) + (quiz_scores.sensitivity * QUIZ_WEIGHT)
+            pigmentation = (ml_pigmentation * ML_WEIGHT) + (quiz_scores.pigmentation * QUIZ_WEIGHT)
+            wrinkle_tendency = (ml_wrinkle * ML_WEIGHT) + (quiz_scores.wrinkle_tendency * QUIZ_WEIGHT)
+        else:
+            oiliness = ml_oiliness
+            sensitivity = ml_sensitivity
+            pigmentation = ml_pigmentation
+            wrinkle_tendency = ml_wrinkle
+
+        # Cek apakah ada label yang terdeteksi per sumbu (threshold >= 0.6)
+        oiliness_detected = oiliness >= THRESHOLD
+        sensitivity_detected = sensitivity >= THRESHOLD
+        pigmentation_detected = pigmentation >= THRESHOLD
+        wrinkle_detected = wrinkle_tendency >= THRESHOLD
 
         # Susun kode Baumann 4 karakter (misal: DSPT, DRPW)
         code = "".join(

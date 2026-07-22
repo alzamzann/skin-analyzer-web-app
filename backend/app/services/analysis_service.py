@@ -1,7 +1,7 @@
 # Import
 from uuid import uuid4
 
-from app.schemas.analysis import AnalysisResult
+from app.schemas.analysis import AnalysisResult, QuizAxisScores
 from app.services.baumann_service import BaumannService
 from app.services.recommendation_service import RecommendationService
 from app.services.roi_service import (
@@ -34,21 +34,25 @@ class AnalysisService:
         self.roi_service = roi_service
 
     # Analisis utama (pipeline lengkap dari citra hingga rekomendasi)
-    def analyze(self, image_bytes: bytes) -> AnalysisResult:
+    def analyze(
+        self,
+        image_bytes: bytes,
+        quiz_scores: QuizAxisScores | None = None,
+    ) -> AnalysisResult:
         # Ekstraksi ROI dari wajah yang terdeteksi
         roi_result = self.roi_service.extract(image_bytes)
         # Inferensi model pada gambar ROI
         predictions = self.inference_service.predict_rois(
             [roi.image for roi in roi_result.rois]
         )
-        # Pemetaan prediksi ke tipe Baumann
+        # Pemetaan prediksi ke tipe Baumann (hybrid: ML + quiz)
         (
             baumann_type,
             attributes,
             mapping,
             confidence,
             description,
-        ) = self.baumann_service.map_predictions(predictions)
+        ) = self.baumann_service.map_predictions(predictions, quiz_scores)
         # Rekomendasi bahan dan produk
         ingredients = self.recommendation_service.recommend_ingredients(baumann_type)
         products = self.recommendation_service.recommend_routine_products(baumann_type)

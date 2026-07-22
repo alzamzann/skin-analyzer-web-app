@@ -23,6 +23,13 @@ class LabelPrediction(CamelModel):
     confidence: float = Field(ge=0, le=1)
 
 
+class QuizAxisScores(CamelModel):
+    oiliness: float = Field(ge=0.0, le=1.0)
+    sensitivity: float = Field(ge=0.0, le=1.0)
+    pigmentation: float = Field(ge=0.0, le=1.0)
+    wrinkle_tendency: float = Field(ge=0.0, le=1.0)
+
+
 class SkinAttributes(CamelModel):
     oiliness: int = Field(ge=0, le=100)
     sensitivity: int = Field(ge=0, le=100)

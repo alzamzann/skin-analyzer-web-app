@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from app.api.dependencies import get_analysis_service
 from app.core.config import Settings, get_settings
@@ -13,6 +13,7 @@ from app.schemas.analysis import (
     LandmarkPoint,
     LandmarkPreviewResponse,
     LabelPrediction,
+    QuizAxisScores,
     RoiPreview,
     RoiPreviewResponse,
 )
@@ -34,14 +35,19 @@ router = APIRouter(tags=["analysis"])
 @router.post("/analyze", response_model=AnalysisResult, response_model_by_alias=True)
 async def analyze_skin(
     image: UploadFile = File(...),
+    quiz_scores_json: str | None = Form(None),
     settings: Settings = Depends(get_settings),
     analysis_service: AnalysisService = Depends(get_analysis_service),
     ) -> AnalysisResult:
     try:
         # Validasi dan baca gambar dari upload
         image_bytes = await read_validated_image(image, settings)
-        # Jalankan pipeline analisis lengkap 
-        return analysis_service.analyze(image_bytes)
+        # Parse quiz_scores dari JSON string
+        quiz_scores = None
+        if quiz_scores_json:
+            quiz_scores = QuizAxisScores.model_validate_json(quiz_scores_json)
+        # Jalankan pipeline analisis lengkap (hybrid: ML + quiz)
+        return analysis_service.analyze(image_bytes, quiz_scores)
     except AnalysisError as error:
         raise HTTPException(
             status_code=error.status_code,

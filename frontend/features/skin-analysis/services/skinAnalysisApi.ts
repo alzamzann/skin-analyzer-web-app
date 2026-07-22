@@ -48,10 +48,16 @@ function getLocalizedApiError(
 // --- API: POST gambar ke /api/analyze, return hasil analisis ---
 export async function analyzeSkinImage({
   image,
+  quizScores,
 }: SkinAnalysisInput): Promise<SkinAnalysisResult> {
-  // --- Buat FormData dan lampirkan gambar ---
+  // --- Buat FormData dan lampirkan gambar + quiz scores ---
   const formData = new FormData();
   formData.append("image", image);
+
+  // Kirim quiz_scores sebagai JSON string
+  if (quizScores) {
+    formData.append("quiz_scores_json", JSON.stringify(quizScores));
+  }
 
   // --- Kirim request POST ke backend ---
   const response = await fetch(endpoints.analyzeSkin, {

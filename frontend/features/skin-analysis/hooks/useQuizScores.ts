@@ -3,7 +3,11 @@
 import { useCallback, useState } from "react";
 
 import type { QuizAnswers, QuizAxisScores } from "../types/quiz.types";
-import { calculateAxisScores, getUniqueAxes } from "../data/quizQuestions";
+import {
+  calculateAxisScores,
+  getUniqueAxes,
+  quizQuestions,
+} from "../data/quizQuestions";
 
 interface QuizState {
   currentAxisIndex: number;
@@ -89,17 +93,7 @@ export function useQuizScores() {
   }, [state.answers]);
 
   // Cek apakah soal saat ini sudah dijawab
-  const axesList = getUniqueAxes();
-  // Hitung question ID berdasarkan index
-  const allQuestions = [
-    ...Array.from({ length: TOTAL_AXES }, (_, axisIdx) =>
-      Array.from({ length: QUESTIONS_PER_AXIS }, (_, qIdx) => {
-        const axis = axesList[axisIdx];
-        return `${axis}-${qIdx + 1}`;
-      }),
-    ).flat(),
-  ];
-  const currentQuestionIdComputed = allQuestions[questionIndex];
+  const currentQuestionIdComputed = quizQuestions[questionIndex]?.id;
   const isCurrentQuestionAnswered =
     currentQuestionIdComputed !== undefined &&
     state.answers[currentQuestionIdComputed] !== undefined;
